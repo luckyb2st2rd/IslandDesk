@@ -3,11 +3,16 @@ import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 
 class IslandSurface extends StatelessWidget {
-  const IslandSurface({required this.controller, super.key});
+  const IslandSurface({
+    required this.controller,
+    this.animationsEnabled = true,
+    super.key,
+  });
 
   static const animationDuration = Duration(milliseconds: 240);
 
   final IslandController controller;
+  final bool animationsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +21,11 @@ class IslandSurface extends StatelessWidget {
       builder: (context, _) {
         final state = controller.state;
         final size = state.surfaceSize;
+        final transitionDuration =
+            animationsEnabled ? animationDuration : Duration.zero;
 
         return AnimatedOpacity(
-          duration: animationDuration,
+          duration: transitionDuration,
           opacity: state.isVisible ? 1 : 0,
           child: IgnorePointer(
             ignoring: !state.isVisible,
@@ -30,7 +37,7 @@ class IslandSurface extends StatelessWidget {
                 onTap: controller.toggleExpanded,
                 child: AnimatedContainer(
                   key: const ValueKey('island-surface'),
-                  duration: animationDuration,
+                  duration: transitionDuration,
                   curve: Curves.easeOutCubic,
                   width: size.width,
                   height: size.height,
@@ -53,7 +60,9 @@ class IslandSurface extends StatelessWidget {
                     ],
                   ),
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 160),
+                    duration: animationsEnabled
+                        ? const Duration(milliseconds: 160)
+                        : Duration.zero,
                     child: state.showsDetails
                         ? const _ExpandedContent(
                             key: ValueKey('expanded-content'),

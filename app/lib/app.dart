@@ -1,35 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:islanddesk/island/island_controller.dart';
+import 'package:islanddesk/application/application_controller.dart';
 import 'package:islanddesk/island/island_screen.dart';
-import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/settings/settings_screen.dart';
 
 class IslandDeskApp extends StatefulWidget {
-  const IslandDeskApp({this.onIslandStateChanged, super.key});
+  const IslandDeskApp({this.controller, super.key});
 
-  final ValueChanged<IslandState>? onIslandStateChanged;
+  final ApplicationController? controller;
 
   @override
   State<IslandDeskApp> createState() => _IslandDeskAppState();
 }
 
 class _IslandDeskAppState extends State<IslandDeskApp> {
-  late final IslandController _controller;
+  late final ApplicationController _controller;
+  late final bool _ownsController;
 
   @override
   void initState() {
     super.initState();
-    _controller = IslandController();
-    _controller.addListener(_notifyStateChanged);
-  }
-
-  void _notifyStateChanged() {
-    widget.onIslandStateChanged?.call(_controller.state);
+    _ownsController = widget.controller == null;
+    _controller = widget.controller ?? ApplicationController();
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_notifyStateChanged);
-    _controller.dispose();
+    if (_ownsController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -47,7 +45,18 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.transparent,
       ),
-      home: IslandScreen(controller: _controller),
+      home: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) => switch (_controller.view) {
+          ApplicationView.island => IslandScreen(
+              controller: _controller.island,
+              animationsEnabled: _controller.animationsEnabled,
+            ),
+          ApplicationView.settings => SettingsScreen(
+              controller: _controller,
+            ),
+        },
+      ),
     );
   }
 }

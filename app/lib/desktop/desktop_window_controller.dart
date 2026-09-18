@@ -6,13 +6,15 @@ import 'package:islanddesk/island/island_state.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
-class DesktopWindowController {
+class DesktopWindowController with WindowListener {
   static const double _horizontalMargin = 24;
   static const double _topMargin = 10;
   static const double _bottomMargin = 34;
 
-  IslandState? _requestedState;
-  bool _isApplyingState = false;
+  static const Size settingsWindowSize = Size(680, 560);
+
+  Size? _requestedSize;
+  bool _isApplyingSize = false;
 
   bool get _isSupportedDesktop =>
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
@@ -35,33 +37,43 @@ class DesktopWindowController {
 
     await windowManager.setAsFrameless();
     await windowManager.setResizable(false);
-    await _applyState(initialState);
+    await windowManager.setPreventClose(true);
+    windowManager.addListener(this);
+    await _applySize(windowSizeFor(initialState));
     await windowManager.show();
   }
 
   void showState(IslandState state) {
     if (!_isSupportedDesktop) return;
-    _requestedState = state;
-    if (!_isApplyingState) {
-      unawaited(_drainStateChanges());
+    _queueSize(windowSizeFor(state));
+  }
+
+  void showSettings() {
+    if (!_isSupportedDesktop) return;
+    _queueSize(settingsWindowSize);
+  }
+
+  void _queueSize(Size size) {
+    _requestedSize = size;
+    if (!_isApplyingSize) {
+      unawaited(_drainSizeChanges());
     }
   }
 
-  Future<void> _drainStateChanges() async {
-    _isApplyingState = true;
+  Future<void> _drainSizeChanges() async {
+    _isApplyingSize = true;
     try {
-      while (_requestedState != null) {
-        final state = _requestedState!;
-        _requestedState = null;
-        await _applyState(state);
+      while (_requestedSize != null) {
+        final size = _requestedSize!;
+        _requestedSize = null;
+        await _applySize(size);
       }
     } finally {
-      _isApplyingState = false;
+      _isApplyingSize = false;
     }
   }
 
-  Future<void> _applyState(IslandState state) async {
-    final size = windowSizeFor(state);
+  Future<void> _applySize(Size size) async {
     final display = await screenRetriever.getPrimaryDisplay();
     final visiblePosition = display.visiblePosition ?? Offset.zero;
     final visibleSize = display.visibleSize ?? display.size;
@@ -72,6 +84,33 @@ class DesktopWindowController {
 
     await windowManager.setSize(size);
     await windowManager.setPosition(position);
+  }
+
+  Future<void> show() async {
+    if (!_isSupportedDesktop) return;
+    await windowManager.show();
+    await windowManager.focus();
+  }
+
+  Future<void> hide() async {
+    if (!_isSupportedDesktop) return;
+    await windowManager.hide();
+  }
+
+  Future<void> setAlwaysOnTop(bool value) async {
+    if (!_isSupportedDesktop) return;
+    await windowManager.setAlwaysOnTop(value);
+  }
+
+  Future<void> destroy() async {
+    if (!_isSupportedDesktop) return;
+    windowManager.removeListener(this);
+    await windowManager.destroy();
+  }
+
+  @override
+  void onWindowClose() {
+    unawaited(hide());
   }
 
   static Size windowSizeFor(IslandState state) {
