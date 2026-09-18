@@ -1,0 +1,28 @@
+# Dart / Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+
+# Rust
+rust/target/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local application data, diagnostics and signing assets
+*.db
+*.db-shm
+*.db-wal
+logs/
+keys/
+*.pfx
+*.p12
+*.pem
+
