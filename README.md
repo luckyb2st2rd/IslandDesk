@@ -48,5 +48,4 @@ The first implementation target is the island shell: a borderless, transparent, 
 
 ## Status
 
-Initial development scaffold. Windows implementation is the current milestone.
-
+Iteration 1 is in progress. The repository now contains the animated Island UI prototype and matching Dart/Rust state-machine tests. Native window management, tray integration, SQLite settings and the generated Flutter-Rust bridge are the next milestones.
