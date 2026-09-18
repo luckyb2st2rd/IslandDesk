@@ -12,6 +12,8 @@ The Rust core owns domain models, service contracts, domain database access, eve
 
 `flutter_rust_bridge` generates the Dart and Rust FFI boundary. Flutter Native Assets builds and bundles the native library for the selected desktop target. Public bridge functions live under `rust/crates/bridge/src/api`; generated files are committed so API drift is reviewable.
 
+Monitor selection is split at a deliberate platform boundary. Rust Core owns the `Primary`, `FollowActive`, and `Fixed` selection/fallback policy. Flutter's desktop adapter enumerates displays through `screen_retriever`, keeps coordinates in logical pixels, and applies the selected work-area position through `window_manager`. A disconnected fixed monitor falls back to primary without discarding the saved monitor ID.
+
 ## Storage boundaries
 
 - Flutter SQLite contains shell preferences only and lives in the operating system application-support directory.
@@ -21,4 +23,4 @@ The Rust core owns domain models, service contracts, domain database access, eve
 
 ## Initial scope
 
-The first vertical slice is the island shell, including state transitions, system tray, settings shell and persistent settings. The first native service is media on Windows. Clipboard persistence is postponed until encrypted storage and application exclusions are implemented.
+The first vertical slice is the island shell, including state transitions, system tray, settings shell, persistent settings and multi-monitor positioning. The next native service is media on Windows. Clipboard persistence is postponed until encrypted storage and application exclusions are implemented.

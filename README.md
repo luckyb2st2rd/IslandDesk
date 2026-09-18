@@ -42,7 +42,7 @@ cargo fmt --all --check
 cargo test --workspace
 ```
 
-The first implementation target is the island shell: a borderless, transparent, always-on-top Windows window with `Collapsed` and `Expanded` states, tray control, a settings shell, and SQLite configuration. The typed Flutter-Rust bridge is active through Flutter Native Assets; native integration continues with `MonitorService` and `MediaService`.
+The first implementation target is the island shell: a borderless, transparent, always-on-top Windows window with `Collapsed` and `Expanded` states, tray control, a settings shell, SQLite configuration, and DPI-aware multi-monitor placement. The typed Flutter-Rust bridge is active through Flutter Native Assets; native integration continues with `MediaService`.
 
 After changing a public API under `rust/crates/bridge/src/api`, regenerate and format the bindings:
 
@@ -61,4 +61,4 @@ cargo fmt --manifest-path rust/Cargo.toml --all
 
 ## Status
 
-Iteration 1 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary display. A system tray owns the application lifecycle, including show, settings and exit actions. Settings are persisted locally in a versioned SQLite database under the operating system application-support directory. Flutter now initializes the Rust core through generated typed bindings and shows its runtime status in the island and settings views.
+Iteration 2 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary, active, or selected fixed display. Monitor selection and fallback policy live in Rust; Flutter applies logical display coordinates and tracks display topology. A system tray owns the application lifecycle, and versioned SQLite settings persist window behavior and monitor placement.

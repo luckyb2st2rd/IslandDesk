@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:islanddesk/src/rust/api/monitor.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
 import 'package:integration_test/integration_test.dart';
@@ -14,5 +15,14 @@ void main() {
     expect(status.version, '0.1.0');
     expect(status.targetOs, isNotEmpty);
     expect(status.targetArch, isNotEmpty);
+
+    final monitor = resolveMonitor(
+      mode: MonitorMode.fixed,
+      displayIds: const ['primary', 'secondary'],
+      primaryId: 'primary',
+      fixedId: 'disconnected',
+    );
+    expect(monitor?.displayId, 'primary');
+    expect(monitor?.usedFallback, isTrue);
   });
 }

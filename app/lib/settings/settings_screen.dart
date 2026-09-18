@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:islanddesk/application/application_controller.dart';
+import 'package:islanddesk/settings/app_settings.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({required this.controller, super.key});
@@ -68,6 +69,14 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     const _SectionTitle(
+                      title: 'Monitor',
+                      subtitle:
+                          'Choose where IslandDesk appears and follows you.',
+                    ),
+                    const SizedBox(height: 12),
+                    _MonitorSettings(controller: controller),
+                    const SizedBox(height: 24),
+                    const _SectionTitle(
                       title: 'Modules',
                       subtitle:
                           'The first native integrations planned for the island.',
@@ -89,6 +98,82 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MonitorSettings extends StatelessWidget {
+  const _MonitorSettings({required this.controller});
+
+  final ApplicationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedFixedId = controller.availableMonitors
+            .any((monitor) => monitor.id == controller.fixedMonitorId)
+        ? controller.fixedMonitorId
+        : null;
+
+    return _SettingsCard(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: DropdownButtonFormField<MonitorPreference>(
+            key: const ValueKey('monitor-mode-setting'),
+            initialValue: controller.monitorPreference,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              icon: Icon(Icons.monitor_rounded),
+              labelText: 'Placement mode',
+            ),
+            items: const [
+              DropdownMenuItem(
+                value: MonitorPreference.primary,
+                child: Text('Primary monitor'),
+              ),
+              DropdownMenuItem(
+                value: MonitorPreference.followActive,
+                child: Text('Follow active monitor'),
+              ),
+              DropdownMenuItem(
+                value: MonitorPreference.fixed,
+                child: Text('Fixed monitor'),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) controller.setMonitorPreference(value);
+            },
+          ),
+        ),
+        if (controller.monitorPreference == MonitorPreference.fixed) ...[
+          const Divider(height: 1, indent: 56),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            child: DropdownButtonFormField<String>(
+              key: const ValueKey('fixed-monitor-setting'),
+              initialValue: selectedFixedId,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                icon: Icon(Icons.desktop_windows_rounded),
+                labelText: 'Display',
+              ),
+              items: [
+                for (final monitor in controller.availableMonitors)
+                  DropdownMenuItem(
+                    value: monitor.id,
+                    child: Text(
+                      monitor.label,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) {
+                if (value != null) controller.setFixedMonitor(value);
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

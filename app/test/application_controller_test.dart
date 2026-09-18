@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islanddesk/application/application_controller.dart';
+import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/settings/app_settings.dart';
 import 'package:islanddesk/settings/settings_repository.dart';
@@ -30,10 +31,26 @@ void main() {
 
     controller.setAlwaysOnTop(false);
     controller.setAnimationsEnabled(false);
+    controller.setMonitorPreference(MonitorPreference.followActive);
 
     expect(controller.alwaysOnTop, isFalse);
     expect(controller.animationsEnabled, isFalse);
+    expect(controller.monitorPreference, MonitorPreference.followActive);
 
+    controller.dispose();
+  });
+
+  test('chooses an available display when fixed mode is selected', () {
+    final controller = ApplicationController(
+      availableMonitors: const [
+        MonitorOption(id: 'display-2', label: 'Display 2'),
+      ],
+    );
+
+    controller.setMonitorPreference(MonitorPreference.fixed);
+
+    expect(controller.monitorPreference, MonitorPreference.fixed);
+    expect(controller.fixedMonitorId, 'display-2');
     controller.dispose();
   });
 
@@ -43,10 +60,15 @@ void main() {
 
     controller.setAlwaysOnTop(false);
     controller.setAnimationsEnabled(false);
+    controller.setMonitorPreference(MonitorPreference.followActive);
     await controller.close();
 
     expect(repository.saved?.alwaysOnTop, isFalse);
     expect(repository.saved?.animationsEnabled, isFalse);
+    expect(
+      repository.saved?.monitorPreference,
+      MonitorPreference.followActive,
+    );
     expect(repository.isClosed, isTrue);
 
     controller.dispose();

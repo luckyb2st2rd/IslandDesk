@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:islanddesk/app.dart';
 import 'package:islanddesk/application/application_controller.dart';
 import 'package:islanddesk/desktop/desktop_window_controller.dart';
+import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/settings/sqlite_settings_repository.dart';
@@ -16,14 +17,21 @@ Future<void> main() async {
   final coreStatus = getCoreStatus();
 
   final settingsRepository = await SqliteSettingsRepository.open();
+  final monitorService = MonitorService();
+  final availableMonitors = await monitorService.listAvailableMonitors();
   final application = ApplicationController(
     initialSettings: await settingsRepository.load(),
     settingsRepository: settingsRepository,
+    availableMonitors: availableMonitors,
     coreStatusLabel: '${coreStatus.name} ${coreStatus.version} • '
         '${coreStatus.targetOs}/${coreStatus.targetArch}',
   );
-  final desktopWindow = DesktopWindowController();
-  await desktopWindow.initialize(IslandState.collapsed);
+  final desktopWindow = DesktopWindowController(monitorService: monitorService);
+  await desktopWindow.initialize(
+    IslandState.collapsed,
+    monitorPreference: application.monitorPreference,
+    fixedMonitorId: application.fixedMonitorId,
+  );
   await desktopWindow.setAlwaysOnTop(application.alwaysOnTop);
 
   void syncWindow() {
@@ -36,6 +44,10 @@ Future<void> main() async {
         break;
     }
     unawaited(desktopWindow.setAlwaysOnTop(application.alwaysOnTop));
+    desktopWindow.setMonitorPreference(
+      application.monitorPreference,
+      application.fixedMonitorId,
+    );
   }
 
   application.addListener(syncWindow);

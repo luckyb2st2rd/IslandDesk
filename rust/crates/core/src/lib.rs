@@ -22,6 +22,61 @@ pub enum IslandEvent {
     Collapse,
 }
 
+/// Policy used to choose the display that owns the Island window.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MonitorMode {
+    Primary,
+    FollowActive,
+    Fixed,
+}
+
+/// Result of applying a monitor policy to the currently available displays.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MonitorSelection {
+    pub display_id: String,
+    pub used_fallback: bool,
+}
+
+/// Selects an available monitor, falling back to primary and then the first
+/// enumerated display when the requested target is unavailable.
+pub fn select_monitor(
+    mode: MonitorMode,
+    display_ids: &[String],
+    primary_id: &str,
+    active_id: Option<&str>,
+    fixed_id: Option<&str>,
+) -> Option<MonitorSelection> {
+    if display_ids.is_empty() {
+        return None;
+    }
+
+    let requested_id = match mode {
+        MonitorMode::Primary => Some(primary_id),
+        MonitorMode::FollowActive => active_id,
+        MonitorMode::Fixed => fixed_id,
+    };
+    let requested = requested_id.and_then(|id| {
+        display_ids
+            .iter()
+            .find(|candidate| candidate.as_str() == id)
+    });
+    if let Some(display_id) = requested {
+        return Some(MonitorSelection {
+            display_id: display_id.clone(),
+            used_fallback: false,
+        });
+    }
+
+    let fallback = display_ids
+        .iter()
+        .find(|candidate| candidate.as_str() == primary_id)
+        .unwrap_or(&display_ids[0]);
+    Some(MonitorSelection {
+        display_id: fallback.clone(),
+        used_fallback: true,
+    })
+}
+
 impl IslandState {
     /// Returns whether the state occupies visible screen space.
     pub const fn is_visible(self) -> bool {
@@ -45,7 +100,7 @@ impl IslandState {
 
 #[cfg(test)]
 mod tests {
-    use super::{IslandEvent, IslandState};
+    use super::{IslandEvent, IslandState, MonitorMode, select_monitor};
 
     #[test]
     fn hidden_is_not_visible() {
@@ -72,6 +127,60 @@ mod tests {
         assert_eq!(
             IslandState::Expanded.transition(IslandEvent::ToggleExpanded),
             IslandState::Collapsed
+        );
+    }
+
+    #[test]
+    fn monitor_policy_selects_primary_active_and_fixed_targets() {
+        let displays = vec!["primary".to_owned(), "secondary".to_owned()];
+
+        for (mode, active, fixed, expected) in [
+            (MonitorMode::Primary, None, None, "primary"),
+            (
+                MonitorMode::FollowActive,
+                Some("secondary"),
+                None,
+                "secondary",
+            ),
+            (MonitorMode::Fixed, None, Some("secondary"), "secondary"),
+        ] {
+            let selection = select_monitor(mode, &displays, "primary", active, fixed).unwrap();
+            assert_eq!(selection.display_id, expected);
+            assert!(!selection.used_fallback);
+        }
+    }
+
+    #[test]
+    fn unavailable_monitor_falls_back_to_primary() {
+        let displays = vec!["primary".to_owned(), "secondary".to_owned()];
+        let selection = select_monitor(
+            MonitorMode::Fixed,
+            &displays,
+            "primary",
+            None,
+            Some("disconnected"),
+        )
+        .unwrap();
+
+        assert_eq!(selection.display_id, "primary");
+        assert!(selection.used_fallback);
+    }
+
+    #[test]
+    fn missing_primary_falls_back_to_first_available_display() {
+        let displays = vec!["secondary".to_owned()];
+        let selection =
+            select_monitor(MonitorMode::Primary, &displays, "missing", None, None).unwrap();
+
+        assert_eq!(selection.display_id, "secondary");
+        assert!(selection.used_fallback);
+    }
+
+    #[test]
+    fn no_displays_produces_no_selection() {
+        assert_eq!(
+            select_monitor(MonitorMode::Primary, &[], "primary", None, None),
+            None
         );
     }
 }

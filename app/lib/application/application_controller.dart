@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/settings/app_settings.dart';
@@ -13,15 +14,23 @@ class ApplicationController extends ChangeNotifier {
     IslandController? islandController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
+    this.availableMonitors = const [],
     this.coreStatusLabel = 'Rust core preview',
   })  : island = islandController ?? IslandController(),
         _settings = initialSettings,
         _settingsRepository = settingsRepository {
+    if (_settings.monitorPreference == MonitorPreference.fixed &&
+        _settings.fixedMonitorId == null &&
+        availableMonitors.isNotEmpty) {
+      _settings =
+          _settings.copyWith(fixedMonitorId: availableMonitors.first.id);
+    }
     island.addListener(_forwardIslandChange);
   }
 
   final IslandController island;
   final String coreStatusLabel;
+  final List<MonitorOption> availableMonitors;
 
   ApplicationView _view = ApplicationView.island;
   AppSettings _settings;
@@ -31,6 +40,8 @@ class ApplicationController extends ChangeNotifier {
   ApplicationView get view => _view;
   bool get alwaysOnTop => _settings.alwaysOnTop;
   bool get animationsEnabled => _settings.animationsEnabled;
+  MonitorPreference get monitorPreference => _settings.monitorPreference;
+  String? get fixedMonitorId => _settings.fixedMonitorId;
 
   void showIsland() {
     if (_view == ApplicationView.island &&
@@ -61,6 +72,28 @@ class ApplicationController extends ChangeNotifier {
   void setAnimationsEnabled(bool value) {
     if (_settings.animationsEnabled == value) return;
     _settings = _settings.copyWith(animationsEnabled: value);
+    notifyListeners();
+    _scheduleSave();
+  }
+
+  void setMonitorPreference(MonitorPreference value) {
+    if (_settings.monitorPreference == value) return;
+    final fixedMonitorId = value == MonitorPreference.fixed &&
+            _settings.fixedMonitorId == null &&
+            availableMonitors.isNotEmpty
+        ? availableMonitors.first.id
+        : _settings.fixedMonitorId;
+    _settings = _settings.copyWith(
+      monitorPreference: value,
+      fixedMonitorId: fixedMonitorId,
+    );
+    notifyListeners();
+    _scheduleSave();
+  }
+
+  void setFixedMonitor(String monitorId) {
+    if (_settings.fixedMonitorId == monitorId) return;
+    _settings = _settings.copyWith(fixedMonitorId: monitorId);
     notifyListeners();
     _scheduleSave();
   }

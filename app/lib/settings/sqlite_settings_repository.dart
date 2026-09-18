@@ -11,10 +11,12 @@ class SqliteSettingsRepository implements SettingsRepository {
     _migrate();
   }
 
-  static const _schemaVersion = 1;
+  static const _schemaVersion = 2;
   static const _inMemoryDatabasePath = ':memory:';
   static const _alwaysOnTopKey = 'always_on_top';
   static const _animationsEnabledKey = 'animations_enabled';
+  static const _monitorPreferenceKey = 'monitor_preference';
+  static const _fixedMonitorIdKey = 'fixed_monitor_id';
 
   final Database _database;
 
@@ -46,6 +48,14 @@ class SqliteSettingsRepository implements SettingsRepository {
           ) STRICT
         ''');
       }
+      if (currentVersion < 2) {
+        _database.execute('''
+          CREATE TABLE text_settings (
+            key TEXT NOT NULL PRIMARY KEY,
+            value TEXT NOT NULL
+          ) STRICT
+        ''');
+      }
       _database.execute('PRAGMA user_version = $_schemaVersion');
       _database.execute('COMMIT');
     } catch (_) {
@@ -59,7 +69,20 @@ class SqliteSettingsRepository implements SettingsRepository {
     return AppSettings(
       alwaysOnTop: _readBool(_alwaysOnTopKey, fallback: true),
       animationsEnabled: _readBool(_animationsEnabledKey, fallback: true),
+      monitorPreference: MonitorPreference.fromStorage(
+        _readText(_monitorPreferenceKey),
+      ),
+      fixedMonitorId: _readText(_fixedMonitorIdKey),
     );
+  }
+
+  String? _readText(String key) {
+    final rows = _database.select(
+      'SELECT value FROM text_settings WHERE key = ?',
+      [key],
+    );
+    if (rows.isEmpty) return null;
+    return rows.single['value'] as String;
   }
 
   bool _readBool(String key, {required bool fallback}) {
@@ -77,11 +100,34 @@ class SqliteSettingsRepository implements SettingsRepository {
     try {
       _writeBool(_alwaysOnTopKey, settings.alwaysOnTop);
       _writeBool(_animationsEnabledKey, settings.animationsEnabled);
+      _writeText(
+        _monitorPreferenceKey,
+        settings.monitorPreference.storageValue,
+      );
+      _writeOptionalText(_fixedMonitorIdKey, settings.fixedMonitorId);
       _database.execute('COMMIT');
     } catch (_) {
       _database.execute('ROLLBACK');
       rethrow;
     }
+  }
+
+  void _writeText(String key, String value) {
+    _database.execute(
+      '''
+        INSERT INTO text_settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+      ''',
+      [key, value],
+    );
+  }
+
+  void _writeOptionalText(String key, String? value) {
+    if (value == null) {
+      _database.execute('DELETE FROM text_settings WHERE key = ?', [key]);
+      return;
+    }
+    _writeText(key, value);
   }
 
   void _writeBool(String key, bool value) {
