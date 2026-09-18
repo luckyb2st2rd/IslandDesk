@@ -15,7 +15,7 @@ class IslandSurface extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final state = controller.state;
-        final size = _sizeFor(state);
+        final size = state.surfaceSize;
 
         return AnimatedOpacity(
           duration: animationDuration,
@@ -71,15 +71,6 @@ class IslandSurface extends StatelessWidget {
       },
     );
   }
-
-  Size _sizeFor(IslandState state) => switch (state) {
-        IslandState.hidden => const Size(180, 42),
-        IslandState.collapsed => const Size(196, 44),
-        IslandState.peek => const Size(252, 52),
-        IslandState.expanded => const Size(420, 180),
-        IslandState.moduleExpanded => const Size(520, 360),
-        IslandState.transientHud => const Size(280, 64),
-      };
 }
 
 class _CompactContent extends StatelessWidget {
@@ -176,7 +167,8 @@ class _ModuleAction extends StatelessWidget {
       children: [
         Icon(icon, size: 22, color: Colors.white70),
         const SizedBox(height: 5),
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.white54)),
+        Text(label,
+            style: const TextStyle(fontSize: 11, color: Colors.white54)),
       ],
     );
   }

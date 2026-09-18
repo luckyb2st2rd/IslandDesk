@@ -28,12 +28,14 @@ The UI must call domain capabilities (for example, `media.playPause`) rather tha
 
 ## Bootstrap
 
-The Windows workstation is configured with Flutter stable, Rust stable and Visual Studio 2022 Build Tools. Generate the native Flutter runner projects from the `app` directory:
+The Windows workstation is configured with Flutter stable, Rust stable and Visual Studio 2022 Build Tools. Windows Developer Mode must be enabled because Flutter desktop plugins use symbolic links. Restore dependencies and verify both workspaces with:
 
 ```powershell
 cd app
-flutter create --platforms=windows,linux .
 flutter pub get
+flutter analyze
+flutter test
+flutter build windows --release
 cd ..\rust
 cargo test --workspace
 ```
@@ -48,4 +50,4 @@ The first implementation target is the island shell: a borderless, transparent, 
 
 ## Status
 
-Iteration 1 is in progress. The repository now contains the animated Island UI prototype and matching Dart/Rust state-machine tests. Native window management, tray integration, SQLite settings and the generated Flutter-Rust bridge are the next milestones.
+Iteration 1 is in progress. The animated Island UI now runs in a generated native Windows runner as a transparent, frameless, always-on-top window. Its native window size follows the Dart state machine and it is positioned at the top center of the primary display. Tray integration, SQLite settings and the generated Flutter-Rust bridge are the next milestones.

@@ -10,54 +10,13 @@ class IslandScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF11131A), Color(0xFF20263A)],
-          ),
+      backgroundColor: Colors.transparent,
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 10, 24, 34),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: IslandSurface(controller: controller),
         ),
-        child: Stack(
-          children: [
-            const Positioned.fill(child: _DevelopmentBackdrop()),
-            Align(
-              alignment: Alignment.topCenter,
-              child: SafeArea(
-                minimum: const EdgeInsets.only(top: 10),
-                child: IslandSurface(controller: controller),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DevelopmentBackdrop extends StatelessWidget {
-  const _DevelopmentBackdrop();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'IslandDesk',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Windows UI prototype',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white54,
-                ),
-          ),
-        ],
       ),
     );
   }
