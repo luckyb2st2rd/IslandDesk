@@ -13,6 +13,7 @@ class ApplicationController extends ChangeNotifier {
     IslandController? islandController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
+    this.coreStatusLabel = 'Rust core preview',
   })  : island = islandController ?? IslandController(),
         _settings = initialSettings,
         _settingsRepository = settingsRepository {
@@ -20,6 +21,7 @@ class ApplicationController extends ChangeNotifier {
   }
 
   final IslandController island;
+  final String coreStatusLabel;
 
   ApplicationView _view = ApplicationView.island;
   AppSettings _settings;

@@ -51,6 +51,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
           ApplicationView.island => IslandScreen(
               controller: _controller.island,
               animationsEnabled: _controller.animationsEnabled,
+              coreStatusLabel: _controller.coreStatusLabel,
             ),
           ApplicationView.settings => SettingsScreen(
               controller: _controller,

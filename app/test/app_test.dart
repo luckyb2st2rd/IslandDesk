@@ -7,12 +7,12 @@ void main() {
     await tester.pumpWidget(const IslandDeskApp());
 
     expect(find.text('IslandDesk'), findsWidgets);
-    expect(find.text('Nothing playing'), findsNothing);
+    expect(find.text('Rust core connected'), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('island-surface')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Nothing playing'), findsOneWidget);
+    expect(find.text('Rust core connected'), findsOneWidget);
     expect(find.text('Clipboard'), findsOneWidget);
   });
 }

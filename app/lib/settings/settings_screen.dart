@@ -27,7 +27,10 @@ class SettingsScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _SettingsHeader(onClose: controller.showIsland),
+              _SettingsHeader(
+                coreStatusLabel: controller.coreStatusLabel,
+                onClose: controller.showIsland,
+              ),
               const Divider(height: 1, color: Colors.white12),
               Expanded(
                 child: ListView(
@@ -91,8 +94,12 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class _SettingsHeader extends StatelessWidget {
-  const _SettingsHeader({required this.onClose});
+  const _SettingsHeader({
+    required this.coreStatusLabel,
+    required this.onClose,
+  });
 
+  final String coreStatusLabel;
   final VoidCallback onClose;
 
   @override
@@ -111,18 +118,20 @@ class _SettingsHeader extends StatelessWidget {
             child: const Icon(Icons.blur_on_rounded, size: 22),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'IslandDesk Settings',
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'Windows preview',
-                  style: TextStyle(fontSize: 12, color: Colors.white38),
+                  coreStatusLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: Colors.white38),
                 ),
               ],
             ),

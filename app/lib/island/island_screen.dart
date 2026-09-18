@@ -6,11 +6,13 @@ class IslandScreen extends StatelessWidget {
   const IslandScreen({
     required this.controller,
     this.animationsEnabled = true,
+    this.coreStatusLabel = 'Rust core preview',
     super.key,
   });
 
   final IslandController controller;
   final bool animationsEnabled;
+  final String coreStatusLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class IslandScreen extends StatelessWidget {
           child: IslandSurface(
             controller: controller,
             animationsEnabled: animationsEnabled,
+            coreStatusLabel: coreStatusLabel,
           ),
         ),
       ),

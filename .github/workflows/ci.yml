@@ -29,6 +29,7 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.1
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -44,10 +45,12 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.93.1
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
       - run: flutter pub get
+      - run: flutter test integration_test/simple_test.dart -d windows
       - run: flutter build windows --release
       - uses: actions/upload-artifact@v4
         with:

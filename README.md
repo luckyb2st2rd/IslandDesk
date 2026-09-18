@@ -35,12 +35,23 @@ cd app
 flutter pub get
 flutter analyze
 flutter test
+flutter test integration_test/simple_test.dart -d windows
 flutter build windows --release
 cd ..\rust
+cargo fmt --all --check
 cargo test --workspace
 ```
 
-The first implementation target is the island shell: a borderless, transparent, always-on-top Windows window with `Collapsed` and `Expanded` states, tray control, a settings shell, and SQLite configuration. Native integration begins with `MonitorService` and `MediaService`.
+The first implementation target is the island shell: a borderless, transparent, always-on-top Windows window with `Collapsed` and `Expanded` states, tray control, a settings shell, and SQLite configuration. The typed Flutter-Rust bridge is active through Flutter Native Assets; native integration continues with `MonitorService` and `MediaService`.
+
+After changing a public API under `rust/crates/bridge/src/api`, regenerate and format the bindings:
+
+```powershell
+cd app
+flutter_rust_bridge_codegen generate
+cd ..
+cargo fmt --manifest-path rust/Cargo.toml --all
+```
 
 ## Privacy baseline
 
@@ -50,4 +61,4 @@ The first implementation target is the island shell: a borderless, transparent, 
 
 ## Status
 
-Iteration 1 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary display. A system tray owns the application lifecycle, including show, settings and exit actions. Settings are persisted locally in a versioned SQLite database under the operating system application-support directory. The generated Flutter-Rust bridge is the next milestone.
+Iteration 1 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary display. A system tray owns the application lifecycle, including show, settings and exit actions. Settings are persisted locally in a versioned SQLite database under the operating system application-support directory. Flutter now initializes the Rust core through generated typed bindings and shows its runtime status in the island and settings views.

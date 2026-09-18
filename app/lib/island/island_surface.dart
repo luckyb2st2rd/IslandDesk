@@ -6,6 +6,7 @@ class IslandSurface extends StatelessWidget {
   const IslandSurface({
     required this.controller,
     this.animationsEnabled = true,
+    this.coreStatusLabel = 'Rust core preview',
     super.key,
   });
 
@@ -13,6 +14,7 @@ class IslandSurface extends StatelessWidget {
 
   final IslandController controller;
   final bool animationsEnabled;
+  final String coreStatusLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +66,9 @@ class IslandSurface extends StatelessWidget {
                         ? const Duration(milliseconds: 160)
                         : Duration.zero,
                     child: state.showsDetails
-                        ? const _ExpandedContent(
+                        ? _ExpandedContent(
                             key: ValueKey('expanded-content'),
+                            coreStatusLabel: coreStatusLabel,
                           )
                         : _CompactContent(
                             key: const ValueKey('compact-content'),
@@ -108,7 +111,9 @@ class _CompactContent extends StatelessWidget {
 }
 
 class _ExpandedContent extends StatelessWidget {
-  const _ExpandedContent({super.key});
+  const _ExpandedContent({required this.coreStatusLabel, super.key});
+
+  final String coreStatusLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -124,24 +129,26 @@ class _ExpandedContent extends StatelessWidget {
                 color: const Color(0xFF6977E8),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.music_note_rounded),
+              child: const Icon(Icons.memory_rounded),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Nothing playing',
+                  const Text(
+                    'Rust core connected',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 3),
+                  const SizedBox(height: 3),
                   Text(
-                    'Connect a Windows media session',
-                    style: TextStyle(color: Colors.white54),
+                    coreStatusLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white54),
                   ),
                 ],
               ),
