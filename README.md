@@ -28,7 +28,7 @@ The UI must call domain capabilities (for example, `media.playPause`) rather tha
 
 ## Bootstrap
 
-The Flutter SDK is not installed in this workspace. Once installed, generate the native Flutter runner projects from the `app` directory:
+The Windows workstation is configured with Flutter stable, Rust stable and Visual Studio 2022 Build Tools. Generate the native Flutter runner projects from the `app` directory:
 
 ```powershell
 cd app
