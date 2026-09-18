@@ -73,8 +73,8 @@ class SettingsScreen extends StatelessWidget {
                     const _ModuleGrid(),
                     const SizedBox(height: 20),
                     Text(
-                      'Settings are currently kept for this session. Persistent '
-                      'storage will be connected in the next iteration.',
+                      'Changes are saved automatically in the local IslandDesk '
+                      'SQLite database.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.white38,
                           ),

@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islanddesk/application/application_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/settings/app_settings.dart';
+import 'package:islanddesk/settings/settings_repository.dart';
 
 void main() {
   test('forwards island changes and switches application views', () {
@@ -34,4 +36,37 @@ void main() {
 
     controller.dispose();
   });
+
+  test('flushes pending settings before closing', () async {
+    final repository = _FakeSettingsRepository();
+    final controller = ApplicationController(settingsRepository: repository);
+
+    controller.setAlwaysOnTop(false);
+    controller.setAnimationsEnabled(false);
+    await controller.close();
+
+    expect(repository.saved?.alwaysOnTop, isFalse);
+    expect(repository.saved?.animationsEnabled, isFalse);
+    expect(repository.isClosed, isTrue);
+
+    controller.dispose();
+  });
+}
+
+class _FakeSettingsRepository implements SettingsRepository {
+  AppSettings? saved;
+  bool isClosed = false;
+
+  @override
+  Future<AppSettings> load() async => const AppSettings();
+
+  @override
+  Future<void> save(AppSettings settings) async {
+    saved = settings;
+  }
+
+  @override
+  Future<void> close() async {
+    isClosed = true;
+  }
 }

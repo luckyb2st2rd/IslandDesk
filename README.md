@@ -50,4 +50,4 @@ The first implementation target is the island shell: a borderless, transparent, 
 
 ## Status
 
-Iteration 1 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary display. A system tray now owns the application lifecycle, including show, settings and exit actions. The settings shell controls animations and always-on-top behavior for the current session. SQLite persistence and the generated Flutter-Rust bridge are the next milestones.
+Iteration 1 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary display. A system tray owns the application lifecycle, including show, settings and exit actions. Settings are persisted locally in a versioned SQLite database under the operating system application-support directory. The generated Flutter-Rust bridge is the next milestone.

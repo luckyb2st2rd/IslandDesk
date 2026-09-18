@@ -6,13 +6,19 @@ import 'package:islanddesk/application/application_controller.dart';
 import 'package:islanddesk/desktop/desktop_window_controller.dart';
 import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/settings/sqlite_settings_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final application = ApplicationController();
+  final settingsRepository = await SqliteSettingsRepository.open();
+  final application = ApplicationController(
+    initialSettings: await settingsRepository.load(),
+    settingsRepository: settingsRepository,
+  );
   final desktopWindow = DesktopWindowController();
   await desktopWindow.initialize(IslandState.collapsed);
+  await desktopWindow.setAlwaysOnTop(application.alwaysOnTop);
 
   void syncWindow() {
     switch (application.view) {
@@ -41,6 +47,7 @@ Future<void> main() async {
     onExit: () async {
       application.removeListener(syncWindow);
       await tray.dispose();
+      await application.close();
       application.dispose();
       await desktopWindow.destroy();
     },

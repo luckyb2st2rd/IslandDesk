@@ -1,24 +1,34 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/settings/app_settings.dart';
+import 'package:islanddesk/settings/settings_repository.dart';
 
 enum ApplicationView { island, settings }
 
 class ApplicationController extends ChangeNotifier {
-  ApplicationController({IslandController? islandController})
-      : island = islandController ?? IslandController() {
+  ApplicationController({
+    IslandController? islandController,
+    AppSettings initialSettings = const AppSettings(),
+    SettingsRepository? settingsRepository,
+  })  : island = islandController ?? IslandController(),
+        _settings = initialSettings,
+        _settingsRepository = settingsRepository {
     island.addListener(_forwardIslandChange);
   }
 
   final IslandController island;
 
   ApplicationView _view = ApplicationView.island;
-  bool _alwaysOnTop = true;
-  bool _animationsEnabled = true;
+  AppSettings _settings;
+  final SettingsRepository? _settingsRepository;
+  Future<void> _pendingSave = Future.value();
 
   ApplicationView get view => _view;
-  bool get alwaysOnTop => _alwaysOnTop;
-  bool get animationsEnabled => _animationsEnabled;
+  bool get alwaysOnTop => _settings.alwaysOnTop;
+  bool get animationsEnabled => _settings.animationsEnabled;
 
   void showIsland() {
     if (_view == ApplicationView.island &&
@@ -40,15 +50,29 @@ class ApplicationController extends ChangeNotifier {
   }
 
   void setAlwaysOnTop(bool value) {
-    if (_alwaysOnTop == value) return;
-    _alwaysOnTop = value;
+    if (_settings.alwaysOnTop == value) return;
+    _settings = _settings.copyWith(alwaysOnTop: value);
     notifyListeners();
+    _scheduleSave();
   }
 
   void setAnimationsEnabled(bool value) {
-    if (_animationsEnabled == value) return;
-    _animationsEnabled = value;
+    if (_settings.animationsEnabled == value) return;
+    _settings = _settings.copyWith(animationsEnabled: value);
     notifyListeners();
+    _scheduleSave();
+  }
+
+  void _scheduleSave() {
+    final repository = _settingsRepository;
+    if (repository == null) return;
+    final snapshot = _settings;
+    _pendingSave = _pendingSave.then((_) => repository.save(snapshot));
+  }
+
+  Future<void> close() async {
+    await _pendingSave;
+    await _settingsRepository?.close();
   }
 
   void _forwardIslandChange() => notifyListeners();
