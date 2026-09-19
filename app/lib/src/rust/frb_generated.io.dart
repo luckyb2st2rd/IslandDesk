@@ -3,6 +3,7 @@
 
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
+import 'api/clipboard.dart';
 import 'api/fullscreen.dart';
 import 'api/media.dart';
 import 'api/monitor.dart';
@@ -39,6 +40,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   MonitorResolution dco_decode_box_autoadd_monitor_resolution(dynamic raw);
+
+  @protected
+  ClipboardSecurityStatus dco_decode_clipboard_security_status(dynamic raw);
 
   @protected
   CoreStatus dco_decode_core_status(dynamic raw);
@@ -105,6 +109,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   MonitorResolution sse_decode_box_autoadd_monitor_resolution(
+      SseDeserializer deserializer);
+
+  @protected
+  ClipboardSecurityStatus sse_decode_clipboard_security_status(
       SseDeserializer deserializer);
 
   @protected
@@ -176,6 +184,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_monitor_resolution(
       MonitorResolution self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_clipboard_security_status(
+      ClipboardSecurityStatus self, SseSerializer serializer);
 
   @protected
   void sse_encode_core_status(CoreStatus self, SseSerializer serializer);

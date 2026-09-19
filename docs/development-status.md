@@ -41,13 +41,17 @@
 - Native File Shelf drag-in from desktop file managers through a cross-platform drop target.
 - Dedicated SQLite File Shelf metadata repository with duplicate suppression and startup restore.
 - File Shelf pin/remove actions that never modify the original file.
+- Authenticated AES-256-GCM clipboard payload encryption in Rust Core.
+- Windows Credential Manager key creation/loading without exposing key bytes to Flutter.
+- Typed bridge readiness status and a protected/disabled Clipboard UI indicator.
 
 ## Next
 
-1. Add the encrypted clipboard-history foundation and application exclusions.
-2. Add File Shelf drag-out and missing-file recovery.
-3. Add persistent notes/timers, then Windows audio and Keep Awake services.
+1. Add the Windows clipboard event listener, encrypted repository and retention limits.
+2. Add Clipboard pause controls and sensitive-application exclusions.
+3. Add File Shelf drag-out and missing-file recovery.
+4. Add persistent notes/timers, then Windows audio and Keep Awake services.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, twenty-nine Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and sixteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, exercises foreground fullscreen detection, and avoids mutating an active user session. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.
+The Windows workstation passes `flutter analyze`, twenty-nine Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, exercises foreground fullscreen detection and verifies Credential Manager-backed clipboard protection without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.

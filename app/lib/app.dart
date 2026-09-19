@@ -60,6 +60,8 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
               shelfController: _controller.shelf,
               animationsEnabled: _controller.animationsEnabled,
               coreStatusLabel: _controller.coreStatusLabel,
+              clipboardSecurityReady: _controller.clipboardSecurityReady,
+              clipboardSecurityBackend: _controller.clipboardSecurityBackend,
               onPointerEntered: _controller.panelPointerEntered,
               onPointerExited: _controller.panelPointerExited,
             ),

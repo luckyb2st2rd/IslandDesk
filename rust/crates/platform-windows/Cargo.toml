@@ -8,6 +8,7 @@ license.workspace = true
 islanddesk-core = { path = "../core" }
 
 [target.'cfg(windows)'.dependencies]
+keyring = "4.2.0"
 windows = { version = "0.62.2", features = [
   "Foundation",
   "Media_Control",

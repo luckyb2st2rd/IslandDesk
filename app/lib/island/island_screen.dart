@@ -11,6 +11,8 @@ class IslandScreen extends StatelessWidget {
     required this.shelfController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
+    this.clipboardSecurityReady = false,
+    this.clipboardSecurityBackend = 'unavailable',
     this.onPointerEntered,
     this.onPointerExited,
     super.key,
@@ -21,6 +23,8 @@ class IslandScreen extends StatelessWidget {
   final ShelfController shelfController;
   final bool animationsEnabled;
   final String coreStatusLabel;
+  final bool clipboardSecurityReady;
+  final String clipboardSecurityBackend;
   final VoidCallback? onPointerEntered;
   final VoidCallback? onPointerExited;
 
@@ -38,6 +42,8 @@ class IslandScreen extends StatelessWidget {
             shelfController: shelfController,
             animationsEnabled: animationsEnabled,
             coreStatusLabel: coreStatusLabel,
+            clipboardSecurityReady: clipboardSecurityReady,
+            clipboardSecurityBackend: clipboardSecurityBackend,
             onPointerEntered: onPointerEntered,
             onPointerExited: onPointerExited,
           ),

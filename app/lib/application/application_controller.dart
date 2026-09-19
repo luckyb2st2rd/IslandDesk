@@ -22,6 +22,8 @@ class ApplicationController extends ChangeNotifier {
     SettingsRepository? settingsRepository,
     this.availableMonitors = const [],
     this.coreStatusLabel = 'Rust core preview',
+    this.clipboardSecurityReady = false,
+    this.clipboardSecurityBackend = 'unavailable',
   })  : island = islandController ?? IslandController(),
         media = mediaController ?? MediaController(),
         shelf = shelfController ?? ShelfController(),
@@ -44,6 +46,8 @@ class ApplicationController extends ChangeNotifier {
   final ShelfController shelf;
   final PanelVisibilityController panelVisibility;
   final String coreStatusLabel;
+  final bool clipboardSecurityReady;
+  final String clipboardSecurityBackend;
   final List<MonitorOption> availableMonitors;
 
   ApplicationView _view = ApplicationView.island;

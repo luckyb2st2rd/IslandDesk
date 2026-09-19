@@ -1,5 +1,6 @@
 //! Platform-neutral domain contracts for IslandDesk.
 
+pub mod clipboard;
 pub mod fullscreen;
 pub mod media;
 

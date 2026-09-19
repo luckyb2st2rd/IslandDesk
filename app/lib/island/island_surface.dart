@@ -15,6 +15,8 @@ class IslandSurface extends StatelessWidget {
     required this.shelfController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
+    this.clipboardSecurityReady = false,
+    this.clipboardSecurityBackend = 'unavailable',
     this.onPointerEntered,
     this.onPointerExited,
     super.key,
@@ -27,6 +29,8 @@ class IslandSurface extends StatelessWidget {
   final ShelfController shelfController;
   final bool animationsEnabled;
   final String coreStatusLabel;
+  final bool clipboardSecurityReady;
+  final String clipboardSecurityBackend;
   final VoidCallback? onPointerEntered;
   final VoidCallback? onPointerExited;
 
@@ -92,6 +96,8 @@ class IslandSurface extends StatelessWidget {
                             mediaController: mediaController,
                             shelfController: shelfController,
                             coreStatusLabel: coreStatusLabel,
+                            clipboardSecurityReady: clipboardSecurityReady,
+                            clipboardSecurityBackend: clipboardSecurityBackend,
                             onPointerEntered: onPointerEntered,
                             onPointerExited: onPointerExited,
                           )
@@ -155,6 +161,8 @@ class _ExpandedContent extends StatelessWidget {
     required this.mediaController,
     required this.shelfController,
     required this.coreStatusLabel,
+    required this.clipboardSecurityReady,
+    required this.clipboardSecurityBackend,
     this.onPointerEntered,
     this.onPointerExited,
     super.key,
@@ -164,6 +172,8 @@ class _ExpandedContent extends StatelessWidget {
   final MediaController mediaController;
   final ShelfController shelfController;
   final String coreStatusLabel;
+  final bool clipboardSecurityReady;
+  final String clipboardSecurityBackend;
   final VoidCallback? onPointerEntered;
   final VoidCallback? onPointerExited;
 
@@ -249,7 +259,10 @@ class _ExpandedContent extends StatelessWidget {
                 onDragEntered: onPointerEntered,
                 onDragExited: onPointerExited,
               ),
-              const _ClipboardModule(),
+              _ClipboardModule(
+                securityReady: clipboardSecurityReady,
+                securityBackend: clipboardSecurityBackend,
+              ),
               const _TimerModule(),
               const _NotesModule(),
               const _ComingSoonModule(
@@ -500,7 +513,13 @@ class _MediaModule extends StatelessWidget {
 }
 
 class _ClipboardModule extends StatefulWidget {
-  const _ClipboardModule();
+  const _ClipboardModule({
+    required this.securityReady,
+    required this.securityBackend,
+  });
+
+  final bool securityReady;
+  final String securityBackend;
 
   @override
   State<_ClipboardModule> createState() => _ClipboardModuleState();
@@ -541,11 +560,21 @@ class _ClipboardModuleState extends State<_ClipboardModule> {
       children: [
         Row(
           children: [
-            const Expanded(
-              child: Text(
+            Expanded(
+              child: const Text(
                 'Current clipboard',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
+            ),
+            Chip(
+              visualDensity: VisualDensity.compact,
+              avatar: Icon(
+                widget.securityReady
+                    ? Icons.lock_rounded
+                    : Icons.lock_open_rounded,
+                size: 14,
+              ),
+              label: Text(widget.securityReady ? 'Protected' : 'History off'),
             ),
             IconButton(
               key: const ValueKey('clipboard-refresh'),
@@ -588,13 +617,20 @@ class _ClipboardModuleState extends State<_ClipboardModule> {
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'History will be added after encrypted storage is ready.',
-          style: TextStyle(fontSize: 11, color: Colors.white38),
+        Text(
+          widget.securityReady
+              ? 'AES-256-GCM key protected by ${_backendLabel(widget.securityBackend)}.'
+              : 'History stays disabled until secure key storage is available.',
+          style: const TextStyle(fontSize: 11, color: Colors.white38),
         ),
       ],
     );
   }
+
+  static String _backendLabel(String backend) => switch (backend) {
+        'windows_credential_manager' => 'Windows Credential Manager',
+        _ => 'the operating system credential store',
+      };
 }
 
 class _NotesModule extends StatefulWidget {

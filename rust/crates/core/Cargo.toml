@@ -7,3 +7,5 @@ license.workspace = true
 [lints]
 workspace = true
 
+[dependencies]
+aes-gcm = { version = "0.11.1", features = ["getrandom"] }

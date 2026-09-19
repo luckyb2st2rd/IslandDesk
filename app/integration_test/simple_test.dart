@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:islanddesk/src/rust/api/clipboard.dart';
 import 'package:islanddesk/src/rust/api/fullscreen.dart';
 import 'package:islanddesk/src/rust/api/media.dart';
 import 'package:islanddesk/src/rust/api/monitor.dart';
@@ -29,6 +30,12 @@ void main() {
 
     expect(mediaPlatformSupported(), isTrue);
     expect(fullscreenPlatformSupported(), isTrue);
+    expect(clipboardSecurityPlatformSupported(), isTrue);
+    final clipboardSecurity = initializeClipboardSecurity();
+    expect(clipboardSecurity.supported, isTrue);
+    expect(clipboardSecurity.ready, isTrue);
+    expect(clipboardSecurity.backend, 'windows_credential_manager');
+    expect(clipboardSecurity.errorCode, isNull);
     expect(await isForegroundFullscreen(), isA<bool>());
     final media = await getCurrentMediaSession();
     final event = await watchMediaSessions().first.timeout(

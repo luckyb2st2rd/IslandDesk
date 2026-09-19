@@ -47,7 +47,10 @@ void main() {
   });
 
   testWidgets('switches between all island modules', (tester) async {
-    final controller = ApplicationController();
+    final controller = ApplicationController(
+      clipboardSecurityReady: true,
+      clipboardSecurityBackend: 'windows_credential_manager',
+    );
     await tester.pumpWidget(IslandDeskApp(controller: controller));
     await tester.tap(find.byKey(const ValueKey('island-surface')));
     await tester.pumpAndSettle();
@@ -59,6 +62,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('module-clipboard')));
     await tester.pump();
     expect(find.byKey(const ValueKey('clipboard-content')), findsOneWidget);
+    expect(find.text('Protected'), findsOneWidget);
+    expect(find.textContaining('Windows Credential Manager'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('module-timer')));
     await tester.pump();

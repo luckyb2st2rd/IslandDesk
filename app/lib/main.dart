@@ -13,6 +13,7 @@ import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/settings/sqlite_settings_repository.dart';
 import 'package:islanddesk/shelf/shelf_controller.dart';
 import 'package:islanddesk/shelf/sqlite_shelf_repository.dart';
+import 'package:islanddesk/src/rust/api/clipboard.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
 
@@ -20,6 +21,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
   final coreStatus = getCoreStatus();
+  final clipboardSecurity = initializeClipboardSecurity();
 
   final settingsRepository = await SqliteSettingsRepository.open();
   final shelfController = ShelfController(
@@ -40,6 +42,8 @@ Future<void> main() async {
     availableMonitors: availableMonitors,
     coreStatusLabel: '${coreStatus.name} ${coreStatus.version} • '
         '${coreStatus.targetOs}/${coreStatus.targetArch}',
+    clipboardSecurityReady: clipboardSecurity.ready,
+    clipboardSecurityBackend: clipboardSecurity.backend,
   );
   final edgeRevealController = EdgeRevealController(
     monitorService: monitorService,

@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1580475193;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 573174897;
 
 // Section: executor
 
@@ -47,6 +47,36 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__clipboard__clipboard_security_platform_supported_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "clipboard_security_platform_supported",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Ok::<_, ()>(crate::api::clipboard::clipboard_security_platform_supported())?;
+                std::result::Result::Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__fullscreen__fullscreen_platform_supported_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -169,6 +199,36 @@ fn wire__crate__api__system__init_app_impl(
                     std::result::Result::Ok(output_ok)
                 })())
             }
+        },
+    )
+}
+fn wire__crate__api__clipboard__initialize_clipboard_security_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "initialize_clipboard_security",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Ok::<_, ()>(crate::api::clipboard::initialize_clipboard_security())?;
+                std::result::Result::Ok(output_ok)
+            })())
         },
     )
 }
@@ -477,6 +537,22 @@ impl SseDecode for bool {
     }
 }
 
+impl SseDecode for crate::api::clipboard::ClipboardSecurityStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_supported = <bool>::sse_decode(deserializer);
+        let mut var_ready = <bool>::sse_decode(deserializer);
+        let mut var_backend = <String>::sse_decode(deserializer);
+        let mut var_errorCode = <Option<String>>::sse_decode(deserializer);
+        return crate::api::clipboard::ClipboardSecurityStatus {
+            supported: var_supported,
+            ready: var_ready,
+            backend: var_backend,
+            error_code: var_errorCode,
+        };
+    }
+}
+
 impl SseDecode for crate::api::system::CoreStatus {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -678,24 +754,24 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        3 => wire__crate__api__media__get_current_media_session_impl(
+        4 => wire__crate__api__media__get_current_media_session_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        4 => wire__crate__api__system__init_app_impl(port, ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__fullscreen__is_foreground_fullscreen_impl(
+        5 => wire__crate__api__system__init_app_impl(port, ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__fullscreen__is_foreground_fullscreen_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        6 => wire__crate__api__media__media_next_impl(port, ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__media__media_play_pause_impl(port, ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__media__media_previous_impl(port, ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__media__media_seek_impl(port, ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__media__watch_media_sessions_impl(port, ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__media__media_next_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__media__media_play_pause_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__media__media_previous_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__media__media_seek_impl(port, ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__media__watch_media_sessions_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -708,20 +784,53 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__fullscreen__fullscreen_platform_supported_impl(
+        1 => wire__crate__api__clipboard__clipboard_security_platform_supported_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        2 => wire__crate__api__system__get_core_status_impl(ptr, rust_vec_len, data_len),
-        7 => wire__crate__api__media__media_platform_supported_impl(ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__monitor__resolve_monitor_impl(ptr, rust_vec_len, data_len),
+        2 => wire__crate__api__fullscreen__fullscreen_platform_supported_impl(
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        3 => wire__crate__api__system__get_core_status_impl(ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__clipboard__initialize_clipboard_security_impl(
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        9 => wire__crate__api__media__media_platform_supported_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__monitor__resolve_monitor_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
 
 // Section: rust2dart
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::clipboard::ClipboardSecurityStatus {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.supported.into_into_dart().into_dart(),
+            self.ready.into_into_dart().into_dart(),
+            self.backend.into_into_dart().into_dart(),
+            self.error_code.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::clipboard::ClipboardSecurityStatus
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::clipboard::ClipboardSecurityStatus>
+    for crate::api::clipboard::ClipboardSecurityStatus
+{
+    fn into_into_dart(self) -> crate::api::clipboard::ClipboardSecurityStatus {
+        self
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::system::CoreStatus {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -899,6 +1008,16 @@ impl SseEncode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_u8(self as _).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::clipboard::ClipboardSecurityStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.supported, serializer);
+        <bool>::sse_encode(self.ready, serializer);
+        <String>::sse_encode(self.backend, serializer);
+        <Option<String>>::sse_encode(self.error_code, serializer);
     }
 }
 
