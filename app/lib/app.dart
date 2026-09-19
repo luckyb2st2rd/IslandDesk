@@ -22,7 +22,11 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
     super.initState();
     _ownsController = widget.controller == null;
     _controller = widget.controller ?? ApplicationController();
-    _appListenable = Listenable.merge([_controller, _controller.media]);
+    _appListenable = Listenable.merge([
+      _controller,
+      _controller.media,
+      _controller.shelf,
+    ]);
   }
 
   @override
@@ -53,6 +57,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
           ApplicationView.island => IslandScreen(
               controller: _controller.island,
               mediaController: _controller.media,
+              shelfController: _controller.shelf,
               animationsEnabled: _controller.animationsEnabled,
               coreStatusLabel: _controller.coreStatusLabel,
               onPointerEntered: _controller.panelPointerEntered,

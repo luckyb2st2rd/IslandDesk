@@ -23,10 +23,10 @@ Normal desktop visibility uses a separate auto-hide input in that policy. While 
 ## Storage boundaries
 
 - Flutter SQLite contains shell preferences only and lives in the operating system application-support directory.
-- Rust persistence will own module configuration and domain records.
+- Rust persistence remains the target for shared domain records. The current File Shelf vertical slice uses a dedicated SQLite repository and database behind a replaceable Dart interface so it can migrate without changing the UI/controller contract.
 - Clipboard contents, notes, filenames and other user data must never be added to the shell-preferences database.
 - Sensitive persistent data requires encryption and operating-system credential storage before implementation.
 
 ## Initial scope
 
-The first vertical slice is the island shell, including state transitions, system tray, settings shell, persistent settings and multi-monitor positioning. The second slice adds Windows media metadata and transport commands. The expanded module navigation now exposes all seven product sections. Clipboard access is currently on-demand, notes are session-only and the timer is local; clipboard and notes persistence remains postponed until encrypted storage and application exclusions are implemented.
+The first vertical slice is the island shell, including state transitions, system tray, settings shell, persistent settings and multi-monitor positioning. The second slice adds Windows media metadata and transport commands. The expanded module navigation now exposes all seven product sections. File Shelf provides native drag-in, deduplication, reference-only persistence, pinning and metadata-only removal. Clipboard access is currently on-demand, notes are session-only and the timer is local; clipboard and notes persistence remains postponed until encrypted storage and application exclusions are implemented.

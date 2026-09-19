@@ -11,6 +11,8 @@ import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/settings/sqlite_settings_repository.dart';
+import 'package:islanddesk/shelf/shelf_controller.dart';
+import 'package:islanddesk/shelf/sqlite_shelf_repository.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
 
@@ -20,6 +22,10 @@ Future<void> main() async {
   final coreStatus = getCoreStatus();
 
   final settingsRepository = await SqliteSettingsRepository.open();
+  final shelfController = ShelfController(
+    repository: await SqliteShelfRepository.open(),
+  );
+  await shelfController.load();
   final monitorService = MonitorService();
   final availableMonitors = await monitorService.listAvailableMonitors();
   final mediaController = MediaController();
@@ -28,6 +34,7 @@ Future<void> main() async {
   await fullscreenController.start();
   final application = ApplicationController(
     mediaController: mediaController,
+    shelfController: shelfController,
     initialSettings: await settingsRepository.load(),
     settingsRepository: settingsRepository,
     availableMonitors: availableMonitors,

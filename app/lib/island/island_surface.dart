@@ -5,11 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/media/media_controller.dart';
+import 'package:islanddesk/shelf/shelf_controller.dart';
+import 'package:islanddesk/shelf/shelf_view.dart';
 
 class IslandSurface extends StatelessWidget {
   const IslandSurface({
     required this.controller,
     required this.mediaController,
+    required this.shelfController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.onPointerEntered,
@@ -21,6 +24,7 @@ class IslandSurface extends StatelessWidget {
 
   final IslandController controller;
   final MediaController mediaController;
+  final ShelfController shelfController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final VoidCallback? onPointerEntered;
@@ -86,7 +90,10 @@ class IslandSurface extends StatelessWidget {
                             key: ValueKey('expanded-content'),
                             controller: controller,
                             mediaController: mediaController,
+                            shelfController: shelfController,
                             coreStatusLabel: coreStatusLabel,
+                            onPointerEntered: onPointerEntered,
+                            onPointerExited: onPointerExited,
                           )
                         : _CompactContent(
                             key: const ValueKey('compact-content'),
@@ -146,13 +153,19 @@ class _ExpandedContent extends StatelessWidget {
   const _ExpandedContent({
     required this.controller,
     required this.mediaController,
+    required this.shelfController,
     required this.coreStatusLabel,
+    this.onPointerEntered,
+    this.onPointerExited,
     super.key,
   });
 
   final IslandController controller;
   final MediaController mediaController;
+  final ShelfController shelfController;
   final String coreStatusLabel;
+  final VoidCallback? onPointerEntered;
+  final VoidCallback? onPointerExited;
 
   @override
   Widget build(BuildContext context) {
@@ -229,13 +242,12 @@ class _ExpandedContent extends StatelessWidget {
                 mediaController: mediaController,
                 coreStatusLabel: coreStatusLabel,
               ),
-              const _ComingSoonModule(
-                key: ValueKey('shelf-content'),
-                icon: Icons.inventory_2_outlined,
-                title: 'File Shelf',
-                description:
-                    'Temporary file references will appear here. Native '
-                    'drag-and-drop is the next Windows adapter.',
+              ShelfView(
+                key: const ValueKey('shelf-content'),
+                controller: shelfController,
+                dropEnabled: selected == IslandModule.shelf,
+                onDragEntered: onPointerEntered,
+                onDragExited: onPointerExited,
               ),
               const _ClipboardModule(),
               const _TimerModule(),

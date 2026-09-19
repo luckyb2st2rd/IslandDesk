@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_surface.dart';
 import 'package:islanddesk/media/media_controller.dart';
+import 'package:islanddesk/shelf/shelf_controller.dart';
 
 class IslandScreen extends StatelessWidget {
   const IslandScreen({
     required this.controller,
     required this.mediaController,
+    required this.shelfController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.onPointerEntered,
@@ -16,6 +18,7 @@ class IslandScreen extends StatelessWidget {
 
   final IslandController controller;
   final MediaController mediaController;
+  final ShelfController shelfController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final VoidCallback? onPointerEntered;
@@ -32,6 +35,7 @@ class IslandScreen extends StatelessWidget {
           child: IslandSurface(
             controller: controller,
             mediaController: mediaController,
+            shelfController: shelfController,
             animationsEnabled: animationsEnabled,
             coreStatusLabel: coreStatusLabel,
             onPointerEntered: onPointerEntered,

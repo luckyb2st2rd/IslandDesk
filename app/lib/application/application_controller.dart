@@ -8,6 +8,7 @@ import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/settings/app_settings.dart';
 import 'package:islanddesk/settings/settings_repository.dart';
+import 'package:islanddesk/shelf/shelf_controller.dart';
 
 enum ApplicationView { island, settings }
 
@@ -15,6 +16,7 @@ class ApplicationController extends ChangeNotifier {
   ApplicationController({
     IslandController? islandController,
     MediaController? mediaController,
+    ShelfController? shelfController,
     PanelVisibilityController? panelVisibilityController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
@@ -22,6 +24,7 @@ class ApplicationController extends ChangeNotifier {
     this.coreStatusLabel = 'Rust core preview',
   })  : island = islandController ?? IslandController(),
         media = mediaController ?? MediaController(),
+        shelf = shelfController ?? ShelfController(),
         panelVisibility =
             panelVisibilityController ?? PanelVisibilityController(),
         _settings = initialSettings,
@@ -38,6 +41,7 @@ class ApplicationController extends ChangeNotifier {
 
   final IslandController island;
   final MediaController media;
+  final ShelfController shelf;
   final PanelVisibilityController panelVisibility;
   final String coreStatusLabel;
   final List<MonitorOption> availableMonitors;
@@ -155,6 +159,7 @@ class ApplicationController extends ChangeNotifier {
 
   Future<void> close() async {
     await _pendingSave;
+    await shelf.close();
     await _settingsRepository?.close();
   }
 
@@ -174,6 +179,7 @@ class ApplicationController extends ChangeNotifier {
     panelVisibility.removeListener(_forwardPanelVisibilityChange);
     island.dispose();
     media.dispose();
+    shelf.dispose();
     panelVisibility.dispose();
     super.dispose();
   }
