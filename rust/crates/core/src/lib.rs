@@ -1,5 +1,7 @@
 //! Platform-neutral domain contracts for IslandDesk.
 
+pub mod media;
+
 /// The visible state of the Island surface.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum IslandState {

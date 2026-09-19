@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/media/media_controller.dart';
 
 class IslandSurface extends StatelessWidget {
   const IslandSurface({
     required this.controller,
+    required this.mediaController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     super.key,
@@ -13,6 +17,7 @@ class IslandSurface extends StatelessWidget {
   static const animationDuration = Duration(milliseconds: 240);
 
   final IslandController controller;
+  final MediaController mediaController;
   final bool animationsEnabled;
   final String coreStatusLabel;
 
@@ -68,11 +73,13 @@ class IslandSurface extends StatelessWidget {
                     child: state.showsDetails
                         ? _ExpandedContent(
                             key: ValueKey('expanded-content'),
+                            mediaController: mediaController,
                             coreStatusLabel: coreStatusLabel,
                           )
                         : _CompactContent(
                             key: const ValueKey('compact-content'),
                             state: state,
+                            mediaController: mediaController,
                           ),
                   ),
                 ),
@@ -86,19 +93,32 @@ class IslandSurface extends StatelessWidget {
 }
 
 class _CompactContent extends StatelessWidget {
-  const _CompactContent({required this.state, super.key});
+  const _CompactContent({
+    required this.state,
+    required this.mediaController,
+    super.key,
+  });
 
   final IslandState state;
+  final MediaController mediaController;
 
   @override
   Widget build(BuildContext context) {
+    final session = mediaController.session;
     return Row(
       children: [
-        const Icon(Icons.graphic_eq_rounded, size: 20),
+        Icon(
+          session == null ? Icons.graphic_eq_rounded : Icons.music_note_rounded,
+          size: 20,
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            state == IslandState.peek ? 'Open IslandDesk' : 'IslandDesk',
+            session?.title.isNotEmpty == true
+                ? session!.title
+                : state == IslandState.peek
+                    ? 'Open IslandDesk'
+                    : 'IslandDesk',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontWeight: FontWeight.w600),
@@ -111,12 +131,30 @@ class _CompactContent extends StatelessWidget {
 }
 
 class _ExpandedContent extends StatelessWidget {
-  const _ExpandedContent({required this.coreStatusLabel, super.key});
+  const _ExpandedContent({
+    required this.mediaController,
+    required this.coreStatusLabel,
+    super.key,
+  });
 
+  final MediaController mediaController;
   final String coreStatusLabel;
 
   @override
   Widget build(BuildContext context) {
+    final session = mediaController.session;
+    final duration = session?.durationMs.toDouble() ?? 0;
+    final position = session?.positionMs.toDouble() ?? 0;
+    final progress =
+        duration <= 0 ? 0.0 : (position / duration).clamp(0.0, 1.0);
+    final subtitle = switch (session) {
+      null when mediaController.errorMessage != null =>
+        'Windows media service unavailable',
+      null => coreStatusLabel,
+      _ when session.artist.isNotEmpty => session.artist,
+      _ => session.sourceAppId,
+    };
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -129,15 +167,23 @@ class _ExpandedContent extends StatelessWidget {
                 color: const Color(0xFF6977E8),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.memory_rounded),
+              child: Icon(
+                session == null
+                    ? Icons.music_off_rounded
+                    : Icons.music_note_rounded,
+              ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Rust core connected',
+                  Text(
+                    session?.title.isNotEmpty == true
+                        ? session!.title
+                        : 'Nothing playing',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -145,7 +191,7 @@ class _ExpandedContent extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    coreStatusLabel,
+                    subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: Colors.white54),
@@ -155,36 +201,52 @@ class _ExpandedContent extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        LinearProgressIndicator(
+          key: const ValueKey('media-progress'),
+          value: progress,
+          minHeight: 3,
+          borderRadius: BorderRadius.circular(2),
+          backgroundColor: Colors.white12,
+        ),
         const Spacer(),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _ModuleAction(icon: Icons.content_copy_rounded, label: 'Clipboard'),
-            _ModuleAction(icon: Icons.folder_copy_rounded, label: 'Shelf'),
-            _ModuleAction(icon: Icons.timer_outlined, label: 'Timer'),
-            _ModuleAction(icon: Icons.note_alt_outlined, label: 'Notes'),
+            IconButton(
+              key: const ValueKey('media-previous'),
+              tooltip: 'Previous',
+              onPressed: session?.capabilities.canPrevious == true
+                  ? () => unawaited(mediaController.previous())
+                  : null,
+              icon: const Icon(Icons.skip_previous_rounded),
+            ),
+            const SizedBox(width: 10),
+            FilledButton.tonalIcon(
+              key: const ValueKey('media-play-pause'),
+              onPressed: session != null &&
+                      (session.capabilities.canPlay ||
+                          session.capabilities.canPause)
+                  ? () => unawaited(mediaController.playPause())
+                  : null,
+              icon: Icon(
+                mediaController.isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
+              ),
+              label: Text(mediaController.isPlaying ? 'Pause' : 'Play'),
+            ),
+            const SizedBox(width: 10),
+            IconButton(
+              key: const ValueKey('media-next'),
+              tooltip: 'Next',
+              onPressed: session?.capabilities.canNext == true
+                  ? () => unawaited(mediaController.next())
+                  : null,
+              icon: const Icon(Icons.skip_next_rounded),
+            ),
           ],
         ),
-      ],
-    );
-  }
-}
-
-class _ModuleAction extends StatelessWidget {
-  const _ModuleAction({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 22, color: Colors.white70),
-        const SizedBox(height: 5),
-        Text(label,
-            style: const TextStyle(fontSize: 11, color: Colors.white54)),
       ],
     );
   }

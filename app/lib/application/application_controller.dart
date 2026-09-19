@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/settings/app_settings.dart';
 import 'package:islanddesk/settings/settings_repository.dart';
 
@@ -12,11 +13,13 @@ enum ApplicationView { island, settings }
 class ApplicationController extends ChangeNotifier {
   ApplicationController({
     IslandController? islandController,
+    MediaController? mediaController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
     this.availableMonitors = const [],
     this.coreStatusLabel = 'Rust core preview',
   })  : island = islandController ?? IslandController(),
+        media = mediaController ?? MediaController(),
         _settings = initialSettings,
         _settingsRepository = settingsRepository {
     if (_settings.monitorPreference == MonitorPreference.fixed &&
@@ -29,6 +32,7 @@ class ApplicationController extends ChangeNotifier {
   }
 
   final IslandController island;
+  final MediaController media;
   final String coreStatusLabel;
   final List<MonitorOption> availableMonitors;
 
@@ -116,6 +120,7 @@ class ApplicationController extends ChangeNotifier {
   void dispose() {
     island.removeListener(_forwardIslandChange);
     island.dispose();
+    media.dispose();
     super.dispose();
   }
 }

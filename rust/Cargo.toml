@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/core", "crates/bridge"]
+members = ["crates/core", "crates/bridge", "crates/platform-windows"]
 resolver = "2"
 
 [workspace.package]
@@ -9,4 +9,3 @@ license = "MIT"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
-

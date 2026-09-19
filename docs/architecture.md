@@ -14,6 +14,8 @@ The Rust core owns domain models, service contracts, domain database access, eve
 
 Monitor selection is split at a deliberate platform boundary. Rust Core owns the `Primary`, `FollowActive`, and `Fixed` selection/fallback policy. Flutter's desktop adapter enumerates displays through `screen_retriever`, keeps coordinates in logical pixels, and applies the selected work-area position through `window_manager`. A disconnected fixed monitor falls back to primary without discarding the saved monitor ID.
 
+Media integration follows the service-adapter boundary. `islanddesk-core` defines media session, capability, command and error types. `islanddesk-platform-windows` is the only crate that calls WinRT Global System Media Transport Controls and initializes a WinRT apartment. `islanddesk-bridge` maps the domain model into generated Dart types. The Flutter media controller serializes refreshes, converts platform failures into non-fatal UI state and never logs media metadata.
+
 ## Storage boundaries
 
 - Flutter SQLite contains shell preferences only and lives in the operating system application-support directory.
@@ -23,4 +25,4 @@ Monitor selection is split at a deliberate platform boundary. Rust Core owns the
 
 ## Initial scope
 
-The first vertical slice is the island shell, including state transitions, system tray, settings shell, persistent settings and multi-monitor positioning. The next native service is media on Windows. Clipboard persistence is postponed until encrypted storage and application exclusions are implemented.
+The first vertical slice is the island shell, including state transitions, system tray, settings shell, persistent settings and multi-monitor positioning. The second slice adds Windows media metadata and transport commands. Clipboard persistence is postponed until encrypted storage and application exclusions are implemented.

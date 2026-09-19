@@ -14,7 +14,7 @@ Flutter UI -> flutter_rust_bridge -> Rust Core -> platform adapters
 ```
 
 - `app/` - Flutter UI, island state machine and settings UI.
-- `rust/` - platform-neutral domain core and native adapters.
+- `rust/` - platform-neutral domain core, typed bridge and native adapters.
 - `docs/` - architecture decisions and development notes.
 - `.github/` - continuous integration.
 
@@ -42,7 +42,7 @@ cargo fmt --all --check
 cargo test --workspace
 ```
 
-The first implementation target is the island shell: a borderless, transparent, always-on-top Windows window with `Collapsed` and `Expanded` states, tray control, a settings shell, SQLite configuration, and DPI-aware multi-monitor placement. The typed Flutter-Rust bridge is active through Flutter Native Assets; native integration continues with `MediaService`.
+The first implementation target is the island shell: a borderless, transparent, always-on-top Windows window with `Collapsed` and `Expanded` states, tray control, a settings shell, SQLite configuration, and DPI-aware multi-monitor placement. The typed Flutter-Rust bridge is active through Flutter Native Assets. The Windows adapter reads and controls the current Global System Media Transport Controls session.
 
 After changing a public API under `rust/crates/bridge/src/api`, regenerate and format the bindings:
 
@@ -61,4 +61,4 @@ cargo fmt --manifest-path rust/Cargo.toml --all
 
 ## Status
 
-Iteration 2 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary, active, or selected fixed display. Monitor selection and fallback policy live in Rust; Flutter applies logical display coordinates and tracks display topology. A system tray owns the application lifecycle, and versioned SQLite settings persist window behavior and monitor placement.
+Iteration 2 is in progress. The animated Island UI runs in a generated native Windows runner as a transparent, frameless window at the top center of the primary, active, or selected fixed display. It displays the current Windows media session with title, artist, progress and capability-aware playback controls. Rust owns monitor and media contracts, while isolated platform adapters perform operating-system integration.

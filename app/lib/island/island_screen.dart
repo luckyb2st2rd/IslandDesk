@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_surface.dart';
+import 'package:islanddesk/media/media_controller.dart';
 
 class IslandScreen extends StatelessWidget {
   const IslandScreen({
     required this.controller,
+    required this.mediaController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     super.key,
   });
 
   final IslandController controller;
+  final MediaController mediaController;
   final bool animationsEnabled;
   final String coreStatusLabel;
 
@@ -24,6 +27,7 @@ class IslandScreen extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: IslandSurface(
             controller: controller,
+            mediaController: mediaController,
             animationsEnabled: animationsEnabled,
             coreStatusLabel: coreStatusLabel,
           ),

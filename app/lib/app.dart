@@ -15,12 +15,14 @@ class IslandDeskApp extends StatefulWidget {
 class _IslandDeskAppState extends State<IslandDeskApp> {
   late final ApplicationController _controller;
   late final bool _ownsController;
+  late final Listenable _appListenable;
 
   @override
   void initState() {
     super.initState();
     _ownsController = widget.controller == null;
     _controller = widget.controller ?? ApplicationController();
+    _appListenable = Listenable.merge([_controller, _controller.media]);
   }
 
   @override
@@ -46,10 +48,11 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
         scaffoldBackgroundColor: Colors.transparent,
       ),
       home: ListenableBuilder(
-        listenable: _controller,
+        listenable: _appListenable,
         builder: (context, _) => switch (_controller.view) {
           ApplicationView.island => IslandScreen(
               controller: _controller.island,
+              mediaController: _controller.media,
               animationsEnabled: _controller.animationsEnabled,
               coreStatusLabel: _controller.coreStatusLabel,
             ),

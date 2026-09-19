@@ -6,6 +6,7 @@
 // Static analysis wrongly picks the IO variant, thus ignore this
 // ignore_for_file: argument_type_not_assignable
 
+import 'api/media.dart';
 import 'api/monitor.dart';
 import 'api/system.dart';
 import 'dart:async';
@@ -28,6 +29,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  MediaSession dco_decode_box_autoadd_media_session(dynamic raw);
+
+  @protected
   MonitorResolution dco_decode_box_autoadd_monitor_resolution(dynamic raw);
 
   @protected
@@ -43,6 +47,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  MediaCapabilities dco_decode_media_capabilities(dynamic raw);
+
+  @protected
+  MediaPlaybackState dco_decode_media_playback_state(dynamic raw);
+
+  @protected
+  MediaSession dco_decode_media_session(dynamic raw);
+
+  @protected
   MonitorMode dco_decode_monitor_mode(dynamic raw);
 
   @protected
@@ -52,7 +65,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  MediaSession? dco_decode_opt_box_autoadd_media_session(dynamic raw);
+
+  @protected
   MonitorResolution? dco_decode_opt_box_autoadd_monitor_resolution(dynamic raw);
+
+  @protected
+  BigInt dco_decode_u_64(dynamic raw);
 
   @protected
   int dco_decode_u_8(dynamic raw);
@@ -65,6 +84,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   bool sse_decode_bool(SseDeserializer deserializer);
+
+  @protected
+  MediaSession sse_decode_box_autoadd_media_session(
+      SseDeserializer deserializer);
 
   @protected
   MonitorResolution sse_decode_box_autoadd_monitor_resolution(
@@ -83,6 +106,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  MediaCapabilities sse_decode_media_capabilities(SseDeserializer deserializer);
+
+  @protected
+  MediaPlaybackState sse_decode_media_playback_state(
+      SseDeserializer deserializer);
+
+  @protected
+  MediaSession sse_decode_media_session(SseDeserializer deserializer);
+
+  @protected
   MonitorMode sse_decode_monitor_mode(SseDeserializer deserializer);
 
   @protected
@@ -92,8 +125,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  MediaSession? sse_decode_opt_box_autoadd_media_session(
+      SseDeserializer deserializer);
+
+  @protected
   MonitorResolution? sse_decode_opt_box_autoadd_monitor_resolution(
       SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_8(SseDeserializer deserializer);
@@ -106,6 +146,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_media_session(
+      MediaSession self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_monitor_resolution(
@@ -125,6 +169,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       Uint8List self, SseSerializer serializer);
 
   @protected
+  void sse_encode_media_capabilities(
+      MediaCapabilities self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_media_playback_state(
+      MediaPlaybackState self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_media_session(MediaSession self, SseSerializer serializer);
+
+  @protected
   void sse_encode_monitor_mode(MonitorMode self, SseSerializer serializer);
 
   @protected
@@ -135,8 +190,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_media_session(
+      MediaSession? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_opt_box_autoadd_monitor_resolution(
       MonitorResolution? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:islanddesk/src/rust/api/media.dart';
 import 'package:islanddesk/src/rust/api/monitor.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
@@ -24,5 +25,13 @@ void main() {
     );
     expect(monitor?.displayId, 'primary');
     expect(monitor?.usedFallback, isTrue);
+
+    expect(mediaPlatformSupported(), isTrue);
+    final media = await getCurrentMediaSession();
+    if (media == null) {
+      expect(await mediaPlayPause(), isFalse);
+    } else {
+      expect(media.sourceAppId, isNotEmpty);
+    }
   });
 }

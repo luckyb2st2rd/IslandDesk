@@ -24,14 +24,19 @@
 - DPI-aware top-center positioning in logical display coordinates.
 - Primary, follow-active and fixed-monitor settings persisted in SQLite schema v2.
 - Display topology refresh and a 400 ms follow-active monitor tracking delay.
+- Platform-neutral Rust `MediaService` contract and media domain model.
+- Isolated Windows GSMTC adapter with explicit WinRT apartment lifetime.
+- Typed Flutter-Rust APIs for current session and Play/Pause/Next/Previous.
+- Island media metadata, playback progress and capability-aware controls.
+- Serialized one-second media refresh with non-fatal error handling.
 
 ## Next
 
-1. Implement the Windows `MediaService` adapter and event stream.
-2. Add fullscreen detection and the default hide-in-fullscreen policy.
-3. Replace the generated tray/application icon with branded assets.
-4. Generate and validate the Linux runner.
+1. Replace the media refresh loop with native GSMTC change events and add artwork.
+2. Add seek support and human-friendly source application names.
+3. Add fullscreen detection and the default hide-in-fullscreen policy.
+4. Replace the generated tray/application icon with branded assets.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, fourteen Flutter widget/controller/layout/persistence tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, and nine Rust workspace tests using the MSVC linker. The release bundle contains `islanddesk_bridge.dll`; the integration test verifies runtime status and monitor fallback through typed Rust calls. The release executable was also smoke-tested after display enumeration and SQLite schema migration.
+The Windows workstation passes `flutter analyze`, seventeen Flutter widget/controller/layout/persistence/media tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and thirteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager without mutating an active user session. The release executable was smoke-tested through media initialization and remained alive in its tray lifecycle.

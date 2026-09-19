@@ -7,6 +7,7 @@ import 'package:islanddesk/desktop/desktop_window_controller.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/settings/sqlite_settings_repository.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
@@ -19,7 +20,10 @@ Future<void> main() async {
   final settingsRepository = await SqliteSettingsRepository.open();
   final monitorService = MonitorService();
   final availableMonitors = await monitorService.listAvailableMonitors();
+  final mediaController = MediaController();
+  await mediaController.start();
   final application = ApplicationController(
+    mediaController: mediaController,
     initialSettings: await settingsRepository.load(),
     settingsRepository: settingsRepository,
     availableMonitors: availableMonitors,
