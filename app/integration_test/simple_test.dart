@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:islanddesk/src/rust/api/fullscreen.dart';
 import 'package:islanddesk/src/rust/api/media.dart';
 import 'package:islanddesk/src/rust/api/monitor.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
@@ -27,6 +28,8 @@ void main() {
     expect(monitor?.usedFallback, isTrue);
 
     expect(mediaPlatformSupported(), isTrue);
+    expect(fullscreenPlatformSupported(), isTrue);
+    expect(await isForegroundFullscreen(), isA<bool>());
     final media = await getCurrentMediaSession();
     final event = await watchMediaSessions().first.timeout(
           const Duration(seconds: 5),

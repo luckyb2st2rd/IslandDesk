@@ -65,6 +65,17 @@ class SettingsScreen extends StatelessWidget {
                             'Animate transitions between island states.',
                           ),
                         ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          key: const ValueKey('hide-in-fullscreen-setting'),
+                          value: controller.hideInFullscreen,
+                          onChanged: controller.setHideInFullscreen,
+                          secondary: const Icon(Icons.fullscreen_rounded),
+                          title: const Text('Hide in fullscreen'),
+                          subtitle: const Text(
+                            'Hide the island while another app fills its monitor.',
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),

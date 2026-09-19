@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:islanddesk/app.dart';
 import 'package:islanddesk/application/application_controller.dart';
 import 'package:islanddesk/desktop/desktop_window_controller.dart';
+import 'package:islanddesk/desktop/fullscreen_controller.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
@@ -22,6 +23,8 @@ Future<void> main() async {
   final availableMonitors = await monitorService.listAvailableMonitors();
   final mediaController = MediaController();
   await mediaController.start();
+  final fullscreenController = FullscreenController();
+  await fullscreenController.start();
   final application = ApplicationController(
     mediaController: mediaController,
     initialSettings: await settingsRepository.load(),
@@ -35,6 +38,9 @@ Future<void> main() async {
     IslandState.collapsed,
     monitorPreference: application.monitorPreference,
     fixedMonitorId: application.fixedMonitorId,
+    fullscreenSuppressed: application.shouldSuppressForFullscreen(
+      fullscreenController.isForegroundFullscreen,
+    ),
   );
   await desktopWindow.setAlwaysOnTop(application.alwaysOnTop);
 
@@ -52,9 +58,17 @@ Future<void> main() async {
       application.monitorPreference,
       application.fixedMonitorId,
     );
+    unawaited(
+      desktopWindow.setFullscreenSuppressed(
+        application.shouldSuppressForFullscreen(
+          fullscreenController.isForegroundFullscreen,
+        ),
+      ),
+    );
   }
 
   application.addListener(syncWindow);
+  fullscreenController.addListener(syncWindow);
 
   late final TrayController tray;
   tray = TrayController(
@@ -68,9 +82,11 @@ Future<void> main() async {
     },
     onExit: () async {
       application.removeListener(syncWindow);
+      fullscreenController.removeListener(syncWindow);
       await tray.dispose();
       await application.close();
       application.dispose();
+      fullscreenController.dispose();
       RustLib.dispose();
       await desktopWindow.destroy();
     },

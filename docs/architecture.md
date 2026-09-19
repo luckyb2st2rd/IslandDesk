@@ -16,6 +16,8 @@ Monitor selection is split at a deliberate platform boundary. Rust Core owns the
 
 Media integration follows the service-adapter boundary. `islanddesk-core` defines media session, capability, command and error types. `islanddesk-platform-windows` is the only crate that calls WinRT Global System Media Transport Controls and initializes a WinRT apartment. It owns bounded artwork reads, seek conversion and manager/session event subscriptions. `islanddesk-bridge` maps the domain model and native event stream into generated Dart types. The Flutter media controller converts platform failures into non-fatal UI state and locally extrapolates playback progress between native timeline events without polling Windows or logging media metadata.
 
+Fullscreen detection uses the same boundary. Rust Core owns rectangle coverage semantics, while the Windows adapter reads the foreground window client bounds and its nearest monitor through Win32. Flutter performs a serialized 500 ms status check and applies a separate visibility policy, so automatic suppression never overrides an explicit close-to-tray action. The settings view is not suppressed, allowing the user to change the policy while another application remains fullscreen.
+
 ## Storage boundaries
 
 - Flutter SQLite contains shell preferences only and lives in the operating system application-support directory.

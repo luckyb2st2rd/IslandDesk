@@ -32,13 +32,15 @@
 - Bounded media artwork transfer from WinRT to Flutter with a resilient fallback icon.
 - Seek support and locally extrapolated playback progress without Windows polling.
 - Human-friendly source application labels derived from Windows application identifiers.
+- Win32 foreground fullscreen detection based on client and monitor bounds.
+- Persisted, default-on hide-in-fullscreen policy with tray-safe restoration.
 
 ## Next
 
-1. Add fullscreen detection and the default hide-in-fullscreen policy.
-2. Replace the generated tray/application icon with branded assets.
-3. Add media-session selection when several players are active.
+1. Replace the generated tray/application icon with branded assets.
+2. Add media-session selection when several players are active.
+3. Add the encrypted clipboard-history foundation and application exclusions.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, eighteen Flutter widget/controller/layout/persistence/media tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and fourteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, and avoids mutating an active user session. The release executable is smoke-tested through media initialization and its tray lifecycle.
+The Windows workstation passes `flutter analyze`, twenty-two Flutter widget/controller/layout/persistence/media/fullscreen tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and sixteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, exercises foreground fullscreen detection, and avoids mutating an active user session. The release executable is smoke-tested through native service initialization and its tray lifecycle.

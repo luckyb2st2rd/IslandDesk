@@ -14,6 +14,11 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('animations-setting')));
     await tester.pump();
     expect(controller.animationsEnabled, isFalse);
+    await tester.tap(
+      find.byKey(const ValueKey('hide-in-fullscreen-setting')),
+    );
+    await tester.pump();
+    expect(controller.hideInFullscreen, isFalse);
 
     final monitorMode = find.byKey(const ValueKey('monitor-mode-setting'));
     await tester.ensureVisible(monitorMode);

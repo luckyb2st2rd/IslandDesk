@@ -15,6 +15,7 @@ class SqliteSettingsRepository implements SettingsRepository {
   static const _inMemoryDatabasePath = ':memory:';
   static const _alwaysOnTopKey = 'always_on_top';
   static const _animationsEnabledKey = 'animations_enabled';
+  static const _hideInFullscreenKey = 'hide_in_fullscreen';
   static const _monitorPreferenceKey = 'monitor_preference';
   static const _fixedMonitorIdKey = 'fixed_monitor_id';
 
@@ -69,6 +70,7 @@ class SqliteSettingsRepository implements SettingsRepository {
     return AppSettings(
       alwaysOnTop: _readBool(_alwaysOnTopKey, fallback: true),
       animationsEnabled: _readBool(_animationsEnabledKey, fallback: true),
+      hideInFullscreen: _readBool(_hideInFullscreenKey, fallback: true),
       monitorPreference: MonitorPreference.fromStorage(
         _readText(_monitorPreferenceKey),
       ),
@@ -100,6 +102,7 @@ class SqliteSettingsRepository implements SettingsRepository {
     try {
       _writeBool(_alwaysOnTopKey, settings.alwaysOnTop);
       _writeBool(_animationsEnabledKey, settings.animationsEnabled);
+      _writeBool(_hideInFullscreenKey, settings.hideInFullscreen);
       _writeText(
         _monitorPreferenceKey,
         settings.monitorPreference.storageValue,

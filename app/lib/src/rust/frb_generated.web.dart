@@ -6,6 +6,7 @@
 // Static analysis wrongly picks the IO variant, thus ignore this
 // ignore_for_file: argument_type_not_assignable
 
+import 'api/fullscreen.dart';
 import 'api/media.dart';
 import 'api/monitor.dart';
 import 'api/system.dart';

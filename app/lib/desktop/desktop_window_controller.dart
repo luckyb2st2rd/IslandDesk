@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:islanddesk/desktop/monitor_service.dart';
+import 'package:islanddesk/desktop/window_visibility_policy.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/settings/app_settings.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -27,6 +28,7 @@ class DesktopWindowController with WindowListener, ScreenListener {
   String? _currentDisplayId;
   Timer? _followActiveTimer;
   bool _isCheckingActiveMonitor = false;
+  final WindowVisibilityPolicy _visibilityPolicy = WindowVisibilityPolicy();
 
   bool get _isSupportedDesktop =>
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
@@ -35,11 +37,13 @@ class DesktopWindowController with WindowListener, ScreenListener {
     IslandState initialState, {
     MonitorPreference monitorPreference = MonitorPreference.primary,
     String? fixedMonitorId,
+    bool fullscreenSuppressed = false,
   }) async {
     if (!_isSupportedDesktop) return;
 
     _monitorPreference = monitorPreference;
     _fixedMonitorId = fixedMonitorId;
+    _visibilityPolicy.setFullscreenSuppressed(fullscreenSuppressed);
 
     await windowManager.ensureInitialized();
     await windowManager.waitUntilReadyToShow(
@@ -61,7 +65,9 @@ class DesktopWindowController with WindowListener, ScreenListener {
     screenRetriever.addListener(this);
     _configureMonitorTracking();
     await _applySize(windowSizeFor(initialState));
-    await windowManager.show();
+    if (_visibilityPolicy.shouldBeVisible) {
+      await windowManager.show();
+    }
   }
 
   void showState(IslandState state) {
@@ -158,6 +164,8 @@ class DesktopWindowController with WindowListener, ScreenListener {
 
   Future<void> show() async {
     if (!_isSupportedDesktop) return;
+    _visibilityPolicy.requestShow();
+    if (!_visibilityPolicy.shouldBeVisible) return;
     final size = _currentSize;
     if (size != null) await _applySize(size);
     await windowManager.show();
@@ -166,7 +174,26 @@ class DesktopWindowController with WindowListener, ScreenListener {
 
   Future<void> hide() async {
     if (!_isSupportedDesktop) return;
+    _visibilityPolicy.requestHide();
     await windowManager.hide();
+  }
+
+  Future<void> setFullscreenSuppressed(bool value) async {
+    if (!_isSupportedDesktop ||
+        _visibilityPolicy.fullscreenSuppressed == value) {
+      return;
+    }
+    final wasVisible = _visibilityPolicy.shouldBeVisible;
+    _visibilityPolicy.setFullscreenSuppressed(value);
+    final shouldBeVisible = _visibilityPolicy.shouldBeVisible;
+    if (wasVisible == shouldBeVisible) return;
+    if (!shouldBeVisible) {
+      await windowManager.hide();
+      return;
+    }
+    final size = _currentSize;
+    if (size != null) await _applySize(size);
+    await windowManager.show();
   }
 
   Future<void> setAlwaysOnTop(bool value) async {

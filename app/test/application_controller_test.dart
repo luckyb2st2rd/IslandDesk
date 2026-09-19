@@ -31,12 +31,29 @@ void main() {
 
     controller.setAlwaysOnTop(false);
     controller.setAnimationsEnabled(false);
+    controller.setHideInFullscreen(false);
     controller.setMonitorPreference(MonitorPreference.followActive);
 
     expect(controller.alwaysOnTop, isFalse);
     expect(controller.animationsEnabled, isFalse);
+    expect(controller.hideInFullscreen, isFalse);
     expect(controller.monitorPreference, MonitorPreference.followActive);
 
+    controller.dispose();
+  });
+
+  test('suppresses only the island view when fullscreen hiding is enabled', () {
+    final controller = ApplicationController();
+
+    expect(controller.shouldSuppressForFullscreen(true), isTrue);
+    expect(controller.shouldSuppressForFullscreen(false), isFalse);
+
+    controller.showSettings();
+    expect(controller.shouldSuppressForFullscreen(true), isFalse);
+
+    controller.setHideInFullscreen(false);
+    controller.showIsland();
+    expect(controller.shouldSuppressForFullscreen(true), isFalse);
     controller.dispose();
   });
 
@@ -60,11 +77,13 @@ void main() {
 
     controller.setAlwaysOnTop(false);
     controller.setAnimationsEnabled(false);
+    controller.setHideInFullscreen(false);
     controller.setMonitorPreference(MonitorPreference.followActive);
     await controller.close();
 
     expect(repository.saved?.alwaysOnTop, isFalse);
     expect(repository.saved?.animationsEnabled, isFalse);
+    expect(repository.saved?.hideInFullscreen, isFalse);
     expect(
       repository.saved?.monitorPreference,
       MonitorPreference.followActive,

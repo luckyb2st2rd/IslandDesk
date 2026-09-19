@@ -1,5 +1,6 @@
 //! Platform-neutral domain contracts for IslandDesk.
 
+pub mod fullscreen;
 pub mod media;
 
 /// The visible state of the Island surface.

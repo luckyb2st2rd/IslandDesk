@@ -44,6 +44,7 @@ class ApplicationController extends ChangeNotifier {
   ApplicationView get view => _view;
   bool get alwaysOnTop => _settings.alwaysOnTop;
   bool get animationsEnabled => _settings.animationsEnabled;
+  bool get hideInFullscreen => _settings.hideInFullscreen;
   MonitorPreference get monitorPreference => _settings.monitorPreference;
   String? get fixedMonitorId => _settings.fixedMonitorId;
 
@@ -79,6 +80,18 @@ class ApplicationController extends ChangeNotifier {
     notifyListeners();
     _scheduleSave();
   }
+
+  void setHideInFullscreen(bool value) {
+    if (_settings.hideInFullscreen == value) return;
+    _settings = _settings.copyWith(hideInFullscreen: value);
+    notifyListeners();
+    _scheduleSave();
+  }
+
+  bool shouldSuppressForFullscreen(bool isForegroundFullscreen) =>
+      _settings.hideInFullscreen &&
+      isForegroundFullscreen &&
+      _view == ApplicationView.island;
 
   void setMonitorPreference(MonitorPreference value) {
     if (_settings.monitorPreference == value) return;
