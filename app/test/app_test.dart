@@ -45,6 +45,51 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     controller.dispose();
   });
+
+  testWidgets('switches between all island modules', (tester) async {
+    final controller = ApplicationController();
+    await tester.pumpWidget(IslandDeskApp(controller: controller));
+    await tester.tap(find.byKey(const ValueKey('island-surface')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('module-shelf')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('shelf-content')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('module-clipboard')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('clipboard-content')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('module-timer')));
+    await tester.pump();
+    expect(find.text('05:00'), findsOneWidget);
+    expect(find.byKey(const ValueKey('timer-toggle')), findsOneWidget);
+
+    await tester.drag(
+      find.byType(SingleChildScrollView).first,
+      const Offset(-420, 0),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('module-notes')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('notes-editor')), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('notes-editor')),
+      'IslandDesk note',
+    );
+
+    await tester.tap(find.byKey(const ValueKey('module-launcher')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('launcher-content')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('module-system')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('system-content')), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    controller.dispose();
+  });
 }
 
 class _FakeMediaGateway implements MediaGateway {

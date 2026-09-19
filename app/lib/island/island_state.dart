@@ -21,8 +21,8 @@ extension IslandStatePresentation on IslandState {
         IslandState.hidden => const Size(180, 42),
         IslandState.collapsed => const Size(196, 44),
         IslandState.peek => const Size(252, 52),
-        IslandState.expanded => const Size(420, 180),
-        IslandState.moduleExpanded => const Size(520, 360),
+        IslandState.expanded => const Size(520, 320),
+        IslandState.moduleExpanded => const Size(520, 320),
         IslandState.transientHud => const Size(280, 64),
       };
 }

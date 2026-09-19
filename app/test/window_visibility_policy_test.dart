@@ -17,5 +17,10 @@ void main() {
 
     policy.requestShow();
     expect(policy.shouldBeVisible, isTrue);
+
+    policy.setAutoHideSuppressed(true);
+    expect(policy.shouldBeVisible, isFalse);
+    policy.setAutoHideSuppressed(false);
+    expect(policy.shouldBeVisible, isTrue);
   });
 }

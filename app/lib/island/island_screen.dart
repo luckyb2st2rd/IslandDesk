@@ -9,6 +9,8 @@ class IslandScreen extends StatelessWidget {
     required this.mediaController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
+    this.onPointerEntered,
+    this.onPointerExited,
     super.key,
   });
 
@@ -16,6 +18,8 @@ class IslandScreen extends StatelessWidget {
   final MediaController mediaController;
   final bool animationsEnabled;
   final String coreStatusLabel;
+  final VoidCallback? onPointerEntered;
+  final VoidCallback? onPointerExited;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +34,8 @@ class IslandScreen extends StatelessWidget {
             mediaController: mediaController,
             animationsEnabled: animationsEnabled,
             coreStatusLabel: coreStatusLabel,
+            onPointerEntered: onPointerEntered,
+            onPointerExited: onPointerExited,
           ),
         ),
       ),

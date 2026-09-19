@@ -67,6 +67,18 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         const Divider(height: 1, indent: 56),
                         SwitchListTile.adaptive(
+                          key: const ValueKey('auto-hide-panel-setting'),
+                          value: controller.autoHidePanel,
+                          onChanged: controller.setAutoHidePanel,
+                          secondary:
+                              const Icon(Icons.keyboard_arrow_up_rounded),
+                          title: const Text('Auto-hide panel'),
+                          subtitle: const Text(
+                            'Reveal from the top-center edge and hide 1.5 seconds after leaving.',
+                          ),
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
                           key: const ValueKey('hide-in-fullscreen-setting'),
                           value: controller.hideInFullscreen,
                           onChanged: controller.setHideInFullscreen,

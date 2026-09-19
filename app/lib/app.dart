@@ -55,6 +55,8 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
               mediaController: _controller.media,
               animationsEnabled: _controller.animationsEnabled,
               coreStatusLabel: _controller.coreStatusLabel,
+              onPointerEntered: _controller.panelPointerEntered,
+              onPointerExited: _controller.panelPointerExited,
             ),
           ApplicationView.settings => SettingsScreen(
               controller: _controller,

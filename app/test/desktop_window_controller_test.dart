@@ -12,7 +12,7 @@ void main() {
     );
     expect(
       DesktopWindowController.windowSizeFor(IslandState.expanded),
-      const Size(468, 224),
+      const Size(568, 364),
     );
   });
 }

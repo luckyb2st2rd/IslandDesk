@@ -38,12 +38,14 @@ class DesktopWindowController with WindowListener, ScreenListener {
     MonitorPreference monitorPreference = MonitorPreference.primary,
     String? fixedMonitorId,
     bool fullscreenSuppressed = false,
+    bool autoHideSuppressed = false,
   }) async {
     if (!_isSupportedDesktop) return;
 
     _monitorPreference = monitorPreference;
     _fixedMonitorId = fixedMonitorId;
     _visibilityPolicy.setFullscreenSuppressed(fullscreenSuppressed);
+    _visibilityPolicy.setAutoHideSuppressed(autoHideSuppressed);
 
     await windowManager.ensureInitialized();
     await windowManager.waitUntilReadyToShow(
@@ -185,6 +187,19 @@ class DesktopWindowController with WindowListener, ScreenListener {
     }
     final wasVisible = _visibilityPolicy.shouldBeVisible;
     _visibilityPolicy.setFullscreenSuppressed(value);
+    await _applyVisibilityChange(wasVisible);
+  }
+
+  Future<void> setAutoHideSuppressed(bool value) async {
+    if (!_isSupportedDesktop || _visibilityPolicy.autoHideSuppressed == value) {
+      return;
+    }
+    final wasVisible = _visibilityPolicy.shouldBeVisible;
+    _visibilityPolicy.setAutoHideSuppressed(value);
+    await _applyVisibilityChange(wasVisible);
+  }
+
+  Future<void> _applyVisibilityChange(bool wasVisible) async {
     final shouldBeVisible = _visibilityPolicy.shouldBeVisible;
     if (wasVisible == shouldBeVisible) return;
     if (!shouldBeVisible) {

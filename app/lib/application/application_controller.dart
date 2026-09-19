@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
+import 'package:islanddesk/desktop/panel_visibility_controller.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/media/media_controller.dart';
@@ -14,12 +15,15 @@ class ApplicationController extends ChangeNotifier {
   ApplicationController({
     IslandController? islandController,
     MediaController? mediaController,
+    PanelVisibilityController? panelVisibilityController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
     this.availableMonitors = const [],
     this.coreStatusLabel = 'Rust core preview',
   })  : island = islandController ?? IslandController(),
         media = mediaController ?? MediaController(),
+        panelVisibility =
+            panelVisibilityController ?? PanelVisibilityController(),
         _settings = initialSettings,
         _settingsRepository = settingsRepository {
     if (_settings.monitorPreference == MonitorPreference.fixed &&
@@ -29,10 +33,12 @@ class ApplicationController extends ChangeNotifier {
           _settings.copyWith(fixedMonitorId: availableMonitors.first.id);
     }
     island.addListener(_forwardIslandChange);
+    panelVisibility.addListener(_forwardPanelVisibilityChange);
   }
 
   final IslandController island;
   final MediaController media;
+  final PanelVisibilityController panelVisibility;
   final String coreStatusLabel;
   final List<MonitorOption> availableMonitors;
 
@@ -45,10 +51,16 @@ class ApplicationController extends ChangeNotifier {
   bool get alwaysOnTop => _settings.alwaysOnTop;
   bool get animationsEnabled => _settings.animationsEnabled;
   bool get hideInFullscreen => _settings.hideInFullscreen;
+  bool get autoHidePanel => _settings.autoHidePanel;
   MonitorPreference get monitorPreference => _settings.monitorPreference;
   String? get fixedMonitorId => _settings.fixedMonitorId;
+  bool get isPanelAutoHidden =>
+      _settings.autoHidePanel &&
+      _view == ApplicationView.island &&
+      panelVisibility.isHidden;
 
   void showIsland() {
+    panelVisibility.reveal();
     if (_view == ApplicationView.island &&
         island.state == IslandState.collapsed) {
       return;
@@ -59,6 +71,17 @@ class ApplicationController extends ChangeNotifier {
     } else {
       island.collapse();
     }
+  }
+
+  void revealIslandFromEdge() {
+    if (_view != ApplicationView.island) return;
+    panelVisibility.reveal();
+  }
+
+  void panelPointerEntered() => panelVisibility.pointerEntered();
+
+  void panelPointerExited() {
+    if (_settings.autoHidePanel) panelVisibility.pointerExited();
   }
 
   void showSettings() {
@@ -84,6 +107,14 @@ class ApplicationController extends ChangeNotifier {
   void setHideInFullscreen(bool value) {
     if (_settings.hideInFullscreen == value) return;
     _settings = _settings.copyWith(hideInFullscreen: value);
+    notifyListeners();
+    _scheduleSave();
+  }
+
+  void setAutoHidePanel(bool value) {
+    if (_settings.autoHidePanel == value) return;
+    _settings = _settings.copyWith(autoHidePanel: value);
+    if (!value) panelVisibility.reveal();
     notifyListeners();
     _scheduleSave();
   }
@@ -129,11 +160,21 @@ class ApplicationController extends ChangeNotifier {
 
   void _forwardIslandChange() => notifyListeners();
 
+  void _forwardPanelVisibilityChange() {
+    if (panelVisibility.isHidden && island.state != IslandState.collapsed) {
+      island.collapse();
+      return;
+    }
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     island.removeListener(_forwardIslandChange);
+    panelVisibility.removeListener(_forwardPanelVisibilityChange);
     island.dispose();
     media.dispose();
+    panelVisibility.dispose();
     super.dispose();
   }
 }

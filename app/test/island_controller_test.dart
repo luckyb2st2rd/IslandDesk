@@ -23,5 +23,15 @@ void main() {
       controller.toggleExpanded();
       expect(controller.state, IslandState.collapsed);
     });
+
+    test('selects modules and expands the island', () {
+      final controller = IslandController();
+
+      controller.selectModule(IslandModule.notes);
+
+      expect(controller.selectedModule, IslandModule.notes);
+      expect(controller.state, IslandState.expanded);
+      controller.dispose();
+    });
   });
 }

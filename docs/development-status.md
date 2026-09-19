@@ -34,13 +34,17 @@
 - Human-friendly source application labels derived from Windows application identifiers.
 - Win32 foreground fullscreen detection based on client and monitor bounds.
 - Persisted, default-on hide-in-fullscreen policy with tray-safe restoration.
+- Persisted, default-on desktop auto-hide with a narrow top-center reveal zone.
+- Native window hiding 1.5 seconds after the pointer leaves the Island.
+- Scrollable module navigation for Media, File Shelf, Clipboard, Timer, Notes, App Launcher and System Controls.
+- On-demand current clipboard view, session-only quick notes and a functional local countdown timer.
 
 ## Next
 
-1. Replace the generated tray/application icon with branded assets.
-2. Add media-session selection when several players are active.
-3. Add the encrypted clipboard-history foundation and application exclusions.
+1. Add the encrypted clipboard-history foundation and application exclusions.
+2. Add native Windows drag-and-drop for File Shelf.
+3. Add persistent notes/timers, then Windows audio and Keep Awake services.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, twenty-two Flutter widget/controller/layout/persistence/media/fullscreen tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and sixteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, exercises foreground fullscreen detection, and avoids mutating an active user session. The release executable is smoke-tested through native service initialization and its tray lifecycle.
+The Windows workstation passes `flutter analyze`, twenty-six Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and sixteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, exercises foreground fullscreen detection, and avoids mutating an active user session. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.

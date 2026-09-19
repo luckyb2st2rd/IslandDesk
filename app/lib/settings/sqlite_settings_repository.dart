@@ -16,6 +16,7 @@ class SqliteSettingsRepository implements SettingsRepository {
   static const _alwaysOnTopKey = 'always_on_top';
   static const _animationsEnabledKey = 'animations_enabled';
   static const _hideInFullscreenKey = 'hide_in_fullscreen';
+  static const _autoHidePanelKey = 'auto_hide_panel';
   static const _monitorPreferenceKey = 'monitor_preference';
   static const _fixedMonitorIdKey = 'fixed_monitor_id';
 
@@ -71,6 +72,7 @@ class SqliteSettingsRepository implements SettingsRepository {
       alwaysOnTop: _readBool(_alwaysOnTopKey, fallback: true),
       animationsEnabled: _readBool(_animationsEnabledKey, fallback: true),
       hideInFullscreen: _readBool(_hideInFullscreenKey, fallback: true),
+      autoHidePanel: _readBool(_autoHidePanelKey, fallback: true),
       monitorPreference: MonitorPreference.fromStorage(
         _readText(_monitorPreferenceKey),
       ),
@@ -103,6 +105,7 @@ class SqliteSettingsRepository implements SettingsRepository {
       _writeBool(_alwaysOnTopKey, settings.alwaysOnTop);
       _writeBool(_animationsEnabledKey, settings.animationsEnabled);
       _writeBool(_hideInFullscreenKey, settings.hideInFullscreen);
+      _writeBool(_autoHidePanelKey, settings.autoHidePanel);
       _writeText(
         _monitorPreferenceKey,
         settings.monitorPreference.storageValue,

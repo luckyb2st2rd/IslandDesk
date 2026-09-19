@@ -18,6 +18,7 @@ void main() {
     expect(defaults.alwaysOnTop, isTrue);
     expect(defaults.animationsEnabled, isTrue);
     expect(defaults.hideInFullscreen, isTrue);
+    expect(defaults.autoHidePanel, isTrue);
     expect(defaults.monitorPreference, MonitorPreference.primary);
     expect(defaults.fixedMonitorId, isNull);
 
@@ -26,6 +27,7 @@ void main() {
         alwaysOnTop: false,
         animationsEnabled: false,
         hideInFullscreen: false,
+        autoHidePanel: false,
         monitorPreference: MonitorPreference.fixed,
         fixedMonitorId: 'display-2',
       ),
@@ -38,6 +40,7 @@ void main() {
     expect(stored.alwaysOnTop, isFalse);
     expect(stored.animationsEnabled, isFalse);
     expect(stored.hideInFullscreen, isFalse);
+    expect(stored.autoHidePanel, isFalse);
     expect(stored.monitorPreference, MonitorPreference.fixed);
     expect(stored.fixedMonitorId, 'display-2');
 
@@ -69,6 +72,7 @@ void main() {
     expect(migrated.alwaysOnTop, isFalse);
     expect(migrated.animationsEnabled, isTrue);
     expect(migrated.hideInFullscreen, isTrue);
+    expect(migrated.autoHidePanel, isTrue);
     expect(migrated.monitorPreference, MonitorPreference.primary);
     await repository.close();
   });

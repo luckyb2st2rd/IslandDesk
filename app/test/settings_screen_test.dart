@@ -14,9 +14,16 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('animations-setting')));
     await tester.pump();
     expect(controller.animationsEnabled, isFalse);
-    await tester.tap(
-      find.byKey(const ValueKey('hide-in-fullscreen-setting')),
-    );
+    final autoHideSetting =
+        find.byKey(const ValueKey('auto-hide-panel-setting'));
+    await tester.ensureVisible(autoHideSetting);
+    await tester.tap(autoHideSetting);
+    await tester.pump();
+    expect(controller.autoHidePanel, isFalse);
+    final hideInFullscreenSetting =
+        find.byKey(const ValueKey('hide-in-fullscreen-setting'));
+    await tester.ensureVisible(hideInFullscreenSetting);
+    await tester.tap(hideInFullscreenSetting);
     await tester.pump();
     expect(controller.hideInFullscreen, isFalse);
 

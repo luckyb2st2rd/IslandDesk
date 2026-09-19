@@ -21,6 +21,7 @@ class AppSettings {
     this.alwaysOnTop = true,
     this.animationsEnabled = true,
     this.hideInFullscreen = true,
+    this.autoHidePanel = true,
     this.monitorPreference = MonitorPreference.primary,
     this.fixedMonitorId,
   });
@@ -28,6 +29,7 @@ class AppSettings {
   final bool alwaysOnTop;
   final bool animationsEnabled;
   final bool hideInFullscreen;
+  final bool autoHidePanel;
   final MonitorPreference monitorPreference;
   final String? fixedMonitorId;
 
@@ -35,6 +37,7 @@ class AppSettings {
     bool? alwaysOnTop,
     bool? animationsEnabled,
     bool? hideInFullscreen,
+    bool? autoHidePanel,
     MonitorPreference? monitorPreference,
     String? fixedMonitorId,
   }) {
@@ -42,6 +45,7 @@ class AppSettings {
       alwaysOnTop: alwaysOnTop ?? this.alwaysOnTop,
       animationsEnabled: animationsEnabled ?? this.animationsEnabled,
       hideInFullscreen: hideInFullscreen ?? this.hideInFullscreen,
+      autoHidePanel: autoHidePanel ?? this.autoHidePanel,
       monitorPreference: monitorPreference ?? this.monitorPreference,
       fixedMonitorId: fixedMonitorId ?? this.fixedMonitorId,
     );

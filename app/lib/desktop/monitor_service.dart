@@ -61,6 +61,8 @@ class MonitorService {
   final MonitorDisplaySource _displaySource;
   final MonitorResolver _resolver;
 
+  Future<Offset> getCursorPosition() => _displaySource.getCursorScreenPoint();
+
   Future<List<MonitorOption>> listAvailableMonitors() async {
     final displays = await _displaySource.getAllDisplays();
     final primary = await _displaySource.getPrimaryDisplay();
