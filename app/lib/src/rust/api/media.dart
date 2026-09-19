@@ -6,7 +6,7 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `current_session`, `execute`
+// These functions are ignored because they are not marked as `pub`: `current_session`, `execute`, `watch`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `from`, `from`, `from`
 
 bool mediaPlatformSupported() =>
@@ -22,6 +22,12 @@ Future<bool> mediaNext() => RustLib.instance.api.crateApiMediaMediaNext();
 
 Future<bool> mediaPrevious() =>
     RustLib.instance.api.crateApiMediaMediaPrevious();
+
+Future<bool> mediaSeek({required BigInt positionMs}) =>
+    RustLib.instance.api.crateApiMediaMediaSeek(positionMs: positionMs);
+
+Stream<MediaSession?> watchMediaSessions() =>
+    RustLib.instance.api.crateApiMediaWatchMediaSessions();
 
 class MediaCapabilities {
   final bool canPlay;
@@ -71,34 +77,43 @@ enum MediaPlaybackState {
 
 class MediaSession {
   final String sourceAppId;
+  final String sourceAppName;
   final String title;
   final String artist;
   final String albumTitle;
   final MediaPlaybackState playbackState;
   final BigInt positionMs;
   final BigInt durationMs;
+  final Uint8List artwork;
+  final String artworkContentType;
   final MediaCapabilities capabilities;
 
   const MediaSession({
     required this.sourceAppId,
+    required this.sourceAppName,
     required this.title,
     required this.artist,
     required this.albumTitle,
     required this.playbackState,
     required this.positionMs,
     required this.durationMs,
+    required this.artwork,
+    required this.artworkContentType,
     required this.capabilities,
   });
 
   @override
   int get hashCode =>
       sourceAppId.hashCode ^
+      sourceAppName.hashCode ^
       title.hashCode ^
       artist.hashCode ^
       albumTitle.hashCode ^
       playbackState.hashCode ^
       positionMs.hashCode ^
       durationMs.hashCode ^
+      artwork.hashCode ^
+      artworkContentType.hashCode ^
       capabilities.hashCode;
 
   @override
@@ -107,11 +122,14 @@ class MediaSession {
       other is MediaSession &&
           runtimeType == other.runtimeType &&
           sourceAppId == other.sourceAppId &&
+          sourceAppName == other.sourceAppName &&
           title == other.title &&
           artist == other.artist &&
           albumTitle == other.albumTitle &&
           playbackState == other.playbackState &&
           positionMs == other.positionMs &&
           durationMs == other.durationMs &&
+          artwork == other.artwork &&
+          artworkContentType == other.artworkContentType &&
           capabilities == other.capabilities;
 }

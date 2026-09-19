@@ -72,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => 233609554;
+  int get rustContentHash => -158772445;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -98,12 +98,16 @@ abstract class RustLibApi extends BaseApi {
 
   Future<bool> crateApiMediaMediaPrevious();
 
+  Future<bool> crateApiMediaMediaSeek({required BigInt positionMs});
+
   MonitorResolution? crateApiMonitorResolveMonitor(
       {required MonitorMode mode,
       required List<String> displayIds,
       required String primaryId,
       String? activeId,
       String? fixedId});
+
+  Stream<MediaSession?> crateApiMediaWatchMediaSessions();
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -278,6 +282,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<bool> crateApiMediaMediaSeek({required BigInt positionMs}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_u_64(positionMs, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 8, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_bool,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiMediaMediaSeekConstMeta,
+      argValues: [positionMs],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiMediaMediaSeekConstMeta => const TaskConstMeta(
+        debugName: "media_seek",
+        argNames: ["positionMs"],
+      );
+
+  @override
   MonitorResolution? crateApiMonitorResolveMonitor(
       {required MonitorMode mode,
       required List<String> displayIds,
@@ -292,7 +320,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_String(primaryId, serializer);
         sse_encode_opt_String(activeId, serializer);
         sse_encode_opt_String(fixedId, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_opt_box_autoadd_monitor_resolution,
@@ -309,6 +337,47 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         debugName: "resolve_monitor",
         argNames: ["mode", "displayIds", "primaryId", "activeId", "fixedId"],
       );
+
+  @override
+  Stream<MediaSession?> crateApiMediaWatchMediaSessions() {
+    final sink = RustStreamSink<MediaSession?>();
+    unawaited(handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_StreamSink_opt_box_autoadd_media_session_Sse(
+            sink, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 10, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_unit,
+        decodeErrorData: sse_decode_String,
+      ),
+      constMeta: kCrateApiMediaWatchMediaSessionsConstMeta,
+      argValues: [sink],
+      apiImpl: this,
+    )));
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiMediaWatchMediaSessionsConstMeta =>
+      const TaskConstMeta(
+        debugName: "watch_media_sessions",
+        argNames: ["sink"],
+      );
+
+  @protected
+  AnyhowException dco_decode_AnyhowException(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return AnyhowException(raw as String);
+  }
+
+  @protected
+  RustStreamSink<MediaSession?>
+      dco_decode_StreamSink_opt_box_autoadd_media_session_Sse(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
+  }
 
   @protected
   String dco_decode_String(dynamic raw) {
@@ -391,17 +460,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   MediaSession dco_decode_media_session(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 8)
-      throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
+    if (arr.length != 11)
+      throw Exception('unexpected arr length: expect 11 but see ${arr.length}');
     return MediaSession(
       sourceAppId: dco_decode_String(arr[0]),
-      title: dco_decode_String(arr[1]),
-      artist: dco_decode_String(arr[2]),
-      albumTitle: dco_decode_String(arr[3]),
-      playbackState: dco_decode_media_playback_state(arr[4]),
-      positionMs: dco_decode_u_64(arr[5]),
-      durationMs: dco_decode_u_64(arr[6]),
-      capabilities: dco_decode_media_capabilities(arr[7]),
+      sourceAppName: dco_decode_String(arr[1]),
+      title: dco_decode_String(arr[2]),
+      artist: dco_decode_String(arr[3]),
+      albumTitle: dco_decode_String(arr[4]),
+      playbackState: dco_decode_media_playback_state(arr[5]),
+      positionMs: dco_decode_u_64(arr[6]),
+      durationMs: dco_decode_u_64(arr[7]),
+      artwork: dco_decode_list_prim_u_8_strict(arr[8]),
+      artworkContentType: dco_decode_String(arr[9]),
+      capabilities: dco_decode_media_capabilities(arr[10]),
     );
   }
 
@@ -458,6 +530,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void dco_decode_unit(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return;
+  }
+
+  @protected
+  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_String(deserializer);
+    return AnyhowException(inner);
+  }
+
+  @protected
+  RustStreamSink<MediaSession?>
+      sse_decode_StreamSink_opt_box_autoadd_media_session_Sse(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
   }
 
   @protected
@@ -555,21 +642,27 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   MediaSession sse_decode_media_session(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_sourceAppId = sse_decode_String(deserializer);
+    var var_sourceAppName = sse_decode_String(deserializer);
     var var_title = sse_decode_String(deserializer);
     var var_artist = sse_decode_String(deserializer);
     var var_albumTitle = sse_decode_String(deserializer);
     var var_playbackState = sse_decode_media_playback_state(deserializer);
     var var_positionMs = sse_decode_u_64(deserializer);
     var var_durationMs = sse_decode_u_64(deserializer);
+    var var_artwork = sse_decode_list_prim_u_8_strict(deserializer);
+    var var_artworkContentType = sse_decode_String(deserializer);
     var var_capabilities = sse_decode_media_capabilities(deserializer);
     return MediaSession(
         sourceAppId: var_sourceAppId,
+        sourceAppName: var_sourceAppName,
         title: var_title,
         artist: var_artist,
         albumTitle: var_albumTitle,
         playbackState: var_playbackState,
         positionMs: var_positionMs,
         durationMs: var_durationMs,
+        artwork: var_artwork,
+        artworkContentType: var_artworkContentType,
         capabilities: var_capabilities);
   }
 
@@ -640,6 +733,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_decode_unit(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  void sse_encode_AnyhowException(
+      AnyhowException self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.message, serializer);
+  }
+
+  @protected
+  void sse_encode_StreamSink_opt_box_autoadd_media_session_Sse(
+      RustStreamSink<MediaSession?> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+        self.setupAndSerialize(
+            codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_media_session,
+          decodeErrorData: sse_decode_AnyhowException,
+        )),
+        serializer);
   }
 
   @protected
@@ -722,12 +835,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_media_session(MediaSession self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.sourceAppId, serializer);
+    sse_encode_String(self.sourceAppName, serializer);
     sse_encode_String(self.title, serializer);
     sse_encode_String(self.artist, serializer);
     sse_encode_String(self.albumTitle, serializer);
     sse_encode_media_playback_state(self.playbackState, serializer);
     sse_encode_u_64(self.positionMs, serializer);
     sse_encode_u_64(self.durationMs, serializer);
+    sse_encode_list_prim_u_8_strict(self.artwork, serializer);
+    sse_encode_String(self.artworkContentType, serializer);
     sse_encode_media_capabilities(self.capabilities, serializer);
   }
 

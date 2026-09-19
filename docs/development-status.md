@@ -28,15 +28,17 @@
 - Isolated Windows GSMTC adapter with explicit WinRT apartment lifetime.
 - Typed Flutter-Rust APIs for current session and Play/Pause/Next/Previous.
 - Island media metadata, playback progress and capability-aware controls.
-- Serialized one-second media refresh with non-fatal error handling.
+- Native GSMTC manager/session event stream with non-fatal error handling and automatic subscription cleanup.
+- Bounded media artwork transfer from WinRT to Flutter with a resilient fallback icon.
+- Seek support and locally extrapolated playback progress without Windows polling.
+- Human-friendly source application labels derived from Windows application identifiers.
 
 ## Next
 
-1. Replace the media refresh loop with native GSMTC change events and add artwork.
-2. Add seek support and human-friendly source application names.
-3. Add fullscreen detection and the default hide-in-fullscreen policy.
-4. Replace the generated tray/application icon with branded assets.
+1. Add fullscreen detection and the default hide-in-fullscreen policy.
+2. Replace the generated tray/application icon with branded assets.
+3. Add media-session selection when several players are active.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, seventeen Flutter widget/controller/layout/persistence/media tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and thirteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager without mutating an active user session. The release executable was smoke-tested through media initialization and remained alive in its tray lifecycle.
+The Windows workstation passes `flutter analyze`, eighteen Flutter widget/controller/layout/persistence/media tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and fourteen Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, and avoids mutating an active user session. The release executable is smoke-tested through media initialization and its tray lifecycle.

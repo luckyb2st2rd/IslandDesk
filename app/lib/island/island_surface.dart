@@ -144,7 +144,7 @@ class _ExpandedContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final session = mediaController.session;
     final duration = session?.durationMs.toDouble() ?? 0;
-    final position = session?.positionMs.toDouble() ?? 0;
+    final position = mediaController.displayPositionMs.toDouble();
     final progress =
         duration <= 0 ? 0.0 : (position / duration).clamp(0.0, 1.0);
     final subtitle = switch (session) {
@@ -152,6 +152,7 @@ class _ExpandedContent extends StatelessWidget {
         'Windows media service unavailable',
       null => coreStatusLabel,
       _ when session.artist.isNotEmpty => session.artist,
+      _ when session.sourceAppName.isNotEmpty => session.sourceAppName,
       _ => session.sourceAppId,
     };
 
@@ -160,17 +161,28 @@ class _ExpandedContent extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: const Color(0xFF6977E8),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                session == null
-                    ? Icons.music_off_rounded
-                    : Icons.music_note_rounded,
+            ClipRRect(
+              key: const ValueKey('media-artwork'),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF6977E8),
+                ),
+                child: session?.artwork.isNotEmpty == true
+                    ? Image.memory(
+                        session!.artwork,
+                        fit: BoxFit.cover,
+                        gaplessPlayback: true,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.music_note_rounded),
+                      )
+                    : Icon(
+                        session == null
+                            ? Icons.music_off_rounded
+                            : Icons.music_note_rounded,
+                      ),
               ),
             ),
             const SizedBox(width: 14),
@@ -201,13 +213,29 @@ class _ExpandedContent extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        LinearProgressIndicator(
-          key: const ValueKey('media-progress'),
-          value: progress,
-          minHeight: 3,
-          borderRadius: BorderRadius.circular(2),
-          backgroundColor: Colors.white12,
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 24,
+          child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 3,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+            ),
+            child: Slider(
+              key: const ValueKey('media-progress'),
+              value: progress,
+              onChanged: session?.capabilities.canSeek == true
+                  ? (value) =>
+                      mediaController.previewSeek((duration * value).round())
+                  : null,
+              onChangeEnd: session?.capabilities.canSeek == true
+                  ? (value) => unawaited(
+                        mediaController.seek((duration * value).round()),
+                      )
+                  : null,
+            ),
+          ),
         ),
         const Spacer(),
         Row(

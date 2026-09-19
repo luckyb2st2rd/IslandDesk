@@ -1,3 +1,4 @@
+use crate::frb_generated::StreamSink;
 use islanddesk_core::media::{
     MediaCapabilities as CoreCapabilities, MediaCommand, MediaPlaybackState as CorePlaybackState,
     MediaService, MediaSession as CoreSession,
@@ -23,12 +24,15 @@ pub struct MediaCapabilities {
 
 pub struct MediaSession {
     pub source_app_id: String,
+    pub source_app_name: String,
     pub title: String,
     pub artist: String,
     pub album_title: String,
     pub playback_state: MediaPlaybackState,
     pub position_ms: u64,
     pub duration_ms: u64,
+    pub artwork: Vec<u8>,
+    pub artwork_content_type: String,
     pub capabilities: MediaCapabilities,
 }
 
@@ -51,6 +55,14 @@ pub fn media_next() -> Result<bool, String> {
 
 pub fn media_previous() -> Result<bool, String> {
     execute(MediaCommand::Previous)
+}
+
+pub fn media_seek(position_ms: u64) -> Result<bool, String> {
+    execute(MediaCommand::Seek { position_ms })
+}
+
+pub fn watch_media_sessions(sink: StreamSink<Option<MediaSession>>) -> Result<(), String> {
+    watch(move |session| sink.add(session.map(Into::into)).is_ok())
 }
 
 #[cfg(windows)]
@@ -77,16 +89,32 @@ fn execute(_command: MediaCommand) -> Result<bool, String> {
     Ok(false)
 }
 
+#[cfg(windows)]
+fn watch(emit: impl FnMut(Option<CoreSession>) -> bool) -> Result<(), String> {
+    islanddesk_platform_windows::WindowsMediaService
+        .watch_current_session(emit)
+        .map_err(|error| error.to_string())
+}
+
+#[cfg(not(windows))]
+fn watch(mut emit: impl FnMut(Option<CoreSession>) -> bool) -> Result<(), String> {
+    let _ = emit(None);
+    Ok(())
+}
+
 impl From<CoreSession> for MediaSession {
     fn from(session: CoreSession) -> Self {
         Self {
             source_app_id: session.source_app_id,
+            source_app_name: session.source_app_name,
             title: session.title,
             artist: session.artist,
             album_title: session.album_title,
             playback_state: session.playback_state.into(),
             position_ms: session.position_ms,
             duration_ms: session.duration_ms,
+            artwork: session.artwork,
+            artwork_content_type: session.artwork_content_type,
             capabilities: session.capabilities.into(),
         }
     }
@@ -129,12 +157,15 @@ mod tests {
     fn maps_core_media_session_to_bridge_model() {
         let session = MediaSession::from(CoreSession {
             source_app_id: "test.player".to_owned(),
+            source_app_name: "Test Player".to_owned(),
             title: "Track".to_owned(),
             artist: "Artist".to_owned(),
             album_title: "Album".to_owned(),
             playback_state: CorePlaybackState::Playing,
             position_ms: 10,
             duration_ms: 20,
+            artwork: vec![1, 2, 3],
+            artwork_content_type: "image/png".to_owned(),
             capabilities: MediaCapabilities {
                 can_play: true,
                 can_pause: true,
@@ -145,6 +176,8 @@ mod tests {
         });
 
         assert_eq!(session.title, "Track");
+        assert_eq!(session.source_app_name, "Test Player");
+        assert_eq!(session.artwork, vec![1, 2, 3]);
         assert!(matches!(
             session.playback_state,
             MediaPlaybackState::Playing

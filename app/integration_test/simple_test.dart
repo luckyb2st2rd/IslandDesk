@@ -28,9 +28,17 @@ void main() {
 
     expect(mediaPlatformSupported(), isTrue);
     final media = await getCurrentMediaSession();
-    if (media == null) {
+    final event = await watchMediaSessions().first.timeout(
+          const Duration(seconds: 5),
+        );
+    if (event != null) {
+      expect(event.sourceAppId, isNotEmpty);
+    }
+    if (media == null && event == null) {
       expect(await mediaPlayPause(), isFalse);
-    } else {
+      expect(await mediaSeek(positionMs: BigInt.zero), isFalse);
+    }
+    if (media != null) {
       expect(media.sourceAppId, isNotEmpty);
     }
   });

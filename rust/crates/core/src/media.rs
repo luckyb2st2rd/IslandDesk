@@ -16,6 +16,7 @@ pub enum MediaCommand {
     PlayPause,
     Next,
     Previous,
+    Seek { position_ms: u64 },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -30,12 +31,15 @@ pub struct MediaCapabilities {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MediaSession {
     pub source_app_id: String,
+    pub source_app_name: String,
     pub title: String,
     pub artist: String,
     pub album_title: String,
     pub playback_state: MediaPlaybackState,
     pub position_ms: u64,
     pub duration_ms: u64,
+    pub artwork: Vec<u8>,
+    pub artwork_content_type: String,
     pub capabilities: MediaCapabilities,
 }
 
@@ -91,12 +95,15 @@ mod tests {
 
         let expected = MediaSession {
             source_app_id: "test.player".to_owned(),
+            source_app_name: "Test Player".to_owned(),
             title: "Test track".to_owned(),
             artist: "Test artist".to_owned(),
             album_title: "Test album".to_owned(),
             playback_state: MediaPlaybackState::Playing,
             position_ms: 1_000,
             duration_ms: 5_000,
+            artwork: vec![1, 2, 3],
+            artwork_content_type: "image/png".to_owned(),
             capabilities: MediaCapabilities {
                 can_play: true,
                 can_pause: true,

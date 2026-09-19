@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islanddesk/app.dart';
@@ -35,6 +37,7 @@ void main() {
 
     expect(find.text('Test track'), findsOneWidget);
     expect(find.text('Test artist'), findsOneWidget);
+    expect(find.byKey(const ValueKey('media-artwork')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('media-play-pause')));
     await tester.pump();
     expect(gateway.playPauseCalls, 1);
@@ -64,16 +67,25 @@ class _FakeMediaGateway implements MediaGateway {
 
   @override
   Future<bool> previous() async => true;
+
+  @override
+  Future<bool> seek(int positionMs) async => true;
+
+  @override
+  Stream<MediaSession?> watchSessions() => const Stream.empty();
 }
 
 final _testSession = MediaSession(
   sourceAppId: 'test.player',
+  sourceAppName: 'Test Player',
   title: 'Test track',
   artist: 'Test artist',
   albumTitle: 'Test album',
   playbackState: MediaPlaybackState.playing,
   positionMs: BigInt.from(1),
   durationMs: BigInt.from(10),
+  artwork: Uint8List(0),
+  artworkContentType: '',
   capabilities: MediaCapabilities(
     canPlay: true,
     canPause: true,
