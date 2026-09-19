@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:islanddesk/app.dart';
 import 'package:islanddesk/application/application_controller.dart';
+import 'package:islanddesk/clipboard/clipboard_controller.dart';
+import 'package:islanddesk/clipboard/sqlite_clipboard_repository.dart';
 import 'package:islanddesk/desktop/desktop_window_controller.dart';
 import 'package:islanddesk/desktop/edge_reveal_controller.dart';
 import 'package:islanddesk/desktop/fullscreen_controller.dart';
@@ -28,6 +30,12 @@ Future<void> main() async {
     repository: await SqliteShelfRepository.open(),
   );
   await shelfController.load();
+  final clipboardController = ClipboardController(
+    enabled: clipboardSecurity.ready,
+    repository:
+        clipboardSecurity.ready ? await SqliteClipboardRepository.open() : null,
+  );
+  await clipboardController.start();
   final monitorService = MonitorService();
   final availableMonitors = await monitorService.listAvailableMonitors();
   final mediaController = MediaController();
@@ -37,6 +45,7 @@ Future<void> main() async {
   final application = ApplicationController(
     mediaController: mediaController,
     shelfController: shelfController,
+    clipboardController: clipboardController,
     initialSettings: await settingsRepository.load(),
     settingsRepository: settingsRepository,
     availableMonitors: availableMonitors,

@@ -6,13 +6,49 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `initialize`
+// These functions are ignored because they are not marked as `pub`: `clipboard_cipher`, `initialize`, `watch`
 
 bool clipboardSecurityPlatformSupported() =>
     RustLib.instance.api.crateApiClipboardClipboardSecurityPlatformSupported();
 
 ClipboardSecurityStatus initializeClipboardSecurity() =>
     RustLib.instance.api.crateApiClipboardInitializeClipboardSecurity();
+
+ClipboardEncryptedData encryptClipboardText(
+        {required String itemId, required String plaintext}) =>
+    RustLib.instance.api.crateApiClipboardEncryptClipboardText(
+        itemId: itemId, plaintext: plaintext);
+
+String decryptClipboardText(
+        {required String itemId,
+        required List<int> nonce,
+        required List<int> ciphertext}) =>
+    RustLib.instance.api.crateApiClipboardDecryptClipboardText(
+        itemId: itemId, nonce: nonce, ciphertext: ciphertext);
+
+Stream<String?> watchClipboardText() =>
+    RustLib.instance.api.crateApiClipboardWatchClipboardText();
+
+class ClipboardEncryptedData {
+  final Uint8List nonce;
+  final Uint8List ciphertext;
+
+  const ClipboardEncryptedData({
+    required this.nonce,
+    required this.ciphertext,
+  });
+
+  @override
+  int get hashCode => nonce.hashCode ^ ciphertext.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClipboardEncryptedData &&
+          runtimeType == other.runtimeType &&
+          nonce == other.nonce &&
+          ciphertext == other.ciphertext;
+}
 
 class ClipboardSecurityStatus {
   final bool supported;

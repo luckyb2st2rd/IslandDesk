@@ -36,6 +36,24 @@ void main() {
     expect(clipboardSecurity.ready, isTrue);
     expect(clipboardSecurity.backend, 'windows_credential_manager');
     expect(clipboardSecurity.errorCode, isNull);
+    final encrypted = encryptClipboardText(
+      itemId: 'integration-item',
+      plaintext: 'IslandDesk clipboard secret',
+    );
+    expect(encrypted.nonce, hasLength(12));
+    expect(encrypted.ciphertext, isNotEmpty);
+    expect(
+      decryptClipboardText(
+        itemId: 'integration-item',
+        nonce: encrypted.nonce,
+        ciphertext: encrypted.ciphertext,
+      ),
+      'IslandDesk clipboard secret',
+    );
+    expect(
+      await watchClipboardText().first.timeout(const Duration(seconds: 5)),
+      anyOf(isNull, isA<String>()),
+    );
     expect(await isForegroundFullscreen(), isA<bool>());
     final media = await getCurrentMediaSession();
     final event = await watchMediaSessions().first.timeout(

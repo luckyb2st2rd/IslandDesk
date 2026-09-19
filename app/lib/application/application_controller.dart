@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:islanddesk/clipboard/clipboard_controller.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/panel_visibility_controller.dart';
 import 'package:islanddesk/island/island_controller.dart';
@@ -17,6 +18,7 @@ class ApplicationController extends ChangeNotifier {
     IslandController? islandController,
     MediaController? mediaController,
     ShelfController? shelfController,
+    ClipboardController? clipboardController,
     PanelVisibilityController? panelVisibilityController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
@@ -27,6 +29,8 @@ class ApplicationController extends ChangeNotifier {
   })  : island = islandController ?? IslandController(),
         media = mediaController ?? MediaController(),
         shelf = shelfController ?? ShelfController(),
+        clipboard = clipboardController ??
+            ClipboardController(enabled: clipboardSecurityReady),
         panelVisibility =
             panelVisibilityController ?? PanelVisibilityController(),
         _settings = initialSettings,
@@ -44,6 +48,7 @@ class ApplicationController extends ChangeNotifier {
   final IslandController island;
   final MediaController media;
   final ShelfController shelf;
+  final ClipboardController clipboard;
   final PanelVisibilityController panelVisibility;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -164,6 +169,7 @@ class ApplicationController extends ChangeNotifier {
   Future<void> close() async {
     await _pendingSave;
     await shelf.close();
+    await clipboard.close();
     await _settingsRepository?.close();
   }
 
@@ -184,6 +190,7 @@ class ApplicationController extends ChangeNotifier {
     island.dispose();
     media.dispose();
     shelf.dispose();
+    clipboard.dispose();
     panelVisibility.dispose();
     super.dispose();
   }

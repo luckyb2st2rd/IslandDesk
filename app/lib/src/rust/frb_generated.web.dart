@@ -28,6 +28,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
+  RustStreamSink<String?> dco_decode_StreamSink_opt_String_Sse(dynamic raw);
+
+  @protected
   RustStreamSink<MediaSession?>
       dco_decode_StreamSink_opt_box_autoadd_media_session_Sse(dynamic raw);
 
@@ -44,6 +47,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MonitorResolution dco_decode_box_autoadd_monitor_resolution(dynamic raw);
 
   @protected
+  ClipboardEncryptedData dco_decode_clipboard_encrypted_data(dynamic raw);
+
+  @protected
   ClipboardSecurityStatus dco_decode_clipboard_security_status(dynamic raw);
 
   @protected
@@ -54,6 +60,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<int> dco_decode_list_prim_u_8_loose(dynamic raw);
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
@@ -95,6 +104,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
+  RustStreamSink<String?> sse_decode_StreamSink_opt_String_Sse(
+      SseDeserializer deserializer);
+
+  @protected
   RustStreamSink<MediaSession?>
       sse_decode_StreamSink_opt_box_autoadd_media_session_Sse(
           SseDeserializer deserializer);
@@ -114,6 +127,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       SseDeserializer deserializer);
 
   @protected
+  ClipboardEncryptedData sse_decode_clipboard_encrypted_data(
+      SseDeserializer deserializer);
+
+  @protected
   ClipboardSecurityStatus sse_decode_clipboard_security_status(
       SseDeserializer deserializer);
 
@@ -125,6 +142,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
@@ -170,6 +190,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       AnyhowException self, SseSerializer serializer);
 
   @protected
+  void sse_encode_StreamSink_opt_String_Sse(
+      RustStreamSink<String?> self, SseSerializer serializer);
+
+  @protected
   void sse_encode_StreamSink_opt_box_autoadd_media_session_Sse(
       RustStreamSink<MediaSession?> self, SseSerializer serializer);
 
@@ -188,6 +212,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       MonitorResolution self, SseSerializer serializer);
 
   @protected
+  void sse_encode_clipboard_encrypted_data(
+      ClipboardEncryptedData self, SseSerializer serializer);
+
+  @protected
   void sse_encode_clipboard_security_status(
       ClipboardSecurityStatus self, SseSerializer serializer);
 
@@ -199,6 +227,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_prim_u_8_strict(

@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:islanddesk/clipboard/clipboard_controller.dart';
+import 'package:islanddesk/clipboard/clipboard_view.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/media/media_controller.dart';
@@ -13,6 +14,7 @@ class IslandSurface extends StatelessWidget {
     required this.controller,
     required this.mediaController,
     required this.shelfController,
+    required this.clipboardController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.clipboardSecurityReady = false,
@@ -27,6 +29,7 @@ class IslandSurface extends StatelessWidget {
   final IslandController controller;
   final MediaController mediaController;
   final ShelfController shelfController;
+  final ClipboardController clipboardController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -95,6 +98,7 @@ class IslandSurface extends StatelessWidget {
                             controller: controller,
                             mediaController: mediaController,
                             shelfController: shelfController,
+                            clipboardController: clipboardController,
                             coreStatusLabel: coreStatusLabel,
                             clipboardSecurityReady: clipboardSecurityReady,
                             clipboardSecurityBackend: clipboardSecurityBackend,
@@ -160,6 +164,7 @@ class _ExpandedContent extends StatelessWidget {
     required this.controller,
     required this.mediaController,
     required this.shelfController,
+    required this.clipboardController,
     required this.coreStatusLabel,
     required this.clipboardSecurityReady,
     required this.clipboardSecurityBackend,
@@ -171,6 +176,7 @@ class _ExpandedContent extends StatelessWidget {
   final IslandController controller;
   final MediaController mediaController;
   final ShelfController shelfController;
+  final ClipboardController clipboardController;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
   final String clipboardSecurityBackend;
@@ -259,7 +265,8 @@ class _ExpandedContent extends StatelessWidget {
                 onDragEntered: onPointerEntered,
                 onDragExited: onPointerExited,
               ),
-              _ClipboardModule(
+              ClipboardView(
+                controller: clipboardController,
                 securityReady: clipboardSecurityReady,
                 securityBackend: clipboardSecurityBackend,
               ),
@@ -510,127 +517,6 @@ class _MediaModule extends StatelessWidget {
       ],
     );
   }
-}
-
-class _ClipboardModule extends StatefulWidget {
-  const _ClipboardModule({
-    required this.securityReady,
-    required this.securityBackend,
-  });
-
-  final bool securityReady;
-  final String securityBackend;
-
-  @override
-  State<_ClipboardModule> createState() => _ClipboardModuleState();
-}
-
-class _ClipboardModuleState extends State<_ClipboardModule> {
-  String _text = 'Press refresh to read the clipboard';
-  bool _loading = false;
-  bool _hasClipboardText = false;
-
-  Future<void> _refresh() async {
-    if (_loading) return;
-    setState(() => _loading = true);
-    try {
-      final data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (!mounted) return;
-      setState(() {
-        final value = data?.text?.trim();
-        _text = value == null || value.isEmpty ? 'Clipboard is empty' : value;
-        _hasClipboardText = value != null && value.isNotEmpty;
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _text = 'Clipboard is unavailable';
-          _hasClipboardText = false;
-        });
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: const Text(
-                'Current clipboard',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ),
-            Chip(
-              visualDensity: VisualDensity.compact,
-              avatar: Icon(
-                widget.securityReady
-                    ? Icons.lock_rounded
-                    : Icons.lock_open_rounded,
-                size: 14,
-              ),
-              label: Text(widget.securityReady ? 'Protected' : 'History off'),
-            ),
-            IconButton(
-              key: const ValueKey('clipboard-refresh'),
-              tooltip: 'Refresh clipboard',
-              onPressed: _loading ? null : _refresh,
-              icon: _loading
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh_rounded),
-            ),
-            IconButton(
-              key: const ValueKey('clipboard-copy'),
-              tooltip: 'Copy again',
-              onPressed: _hasClipboardText
-                  ? () => Clipboard.setData(ClipboardData(text: _text))
-                  : null,
-              icon: const Icon(Icons.copy_rounded),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.045),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white10),
-            ),
-            child: SingleChildScrollView(
-              child: SelectableText(
-                _text,
-                key: const ValueKey('clipboard-content'),
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          widget.securityReady
-              ? 'AES-256-GCM key protected by ${_backendLabel(widget.securityBackend)}.'
-              : 'History stays disabled until secure key storage is available.',
-          style: const TextStyle(fontSize: 11, color: Colors.white38),
-        ),
-      ],
-    );
-  }
-
-  static String _backendLabel(String backend) => switch (backend) {
-        'windows_credential_manager' => 'Windows Credential Manager',
-        _ => 'the operating system credential store',
-      };
 }
 
 class _NotesModule extends StatefulWidget {

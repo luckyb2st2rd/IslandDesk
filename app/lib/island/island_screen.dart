@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:islanddesk/clipboard/clipboard_controller.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_surface.dart';
 import 'package:islanddesk/media/media_controller.dart';
@@ -9,6 +10,7 @@ class IslandScreen extends StatelessWidget {
     required this.controller,
     required this.mediaController,
     required this.shelfController,
+    required this.clipboardController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.clipboardSecurityReady = false,
@@ -21,6 +23,7 @@ class IslandScreen extends StatelessWidget {
   final IslandController controller;
   final MediaController mediaController;
   final ShelfController shelfController;
+  final ClipboardController clipboardController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -40,6 +43,7 @@ class IslandScreen extends StatelessWidget {
             controller: controller,
             mediaController: mediaController,
             shelfController: shelfController,
+            clipboardController: clipboardController,
             animationsEnabled: animationsEnabled,
             coreStatusLabel: coreStatusLabel,
             clipboardSecurityReady: clipboardSecurityReady,

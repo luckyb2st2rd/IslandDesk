@@ -37,21 +37,25 @@
 - Persisted, default-on desktop auto-hide with a narrow top-center reveal zone.
 - Native window hiding 1.5 seconds after the pointer leaves the Island.
 - Scrollable module navigation for Media, File Shelf, Clipboard, Timer, Notes, App Launcher and System Controls.
-- On-demand current clipboard view, session-only quick notes and a functional local countdown timer.
+- Session-only quick notes and a functional local countdown timer.
 - Native File Shelf drag-in from desktop file managers through a cross-platform drop target.
 - Dedicated SQLite File Shelf metadata repository with duplicate suppression and startup restore.
 - File Shelf pin/remove actions that never modify the original file.
 - Authenticated AES-256-GCM clipboard payload encryption in Rust Core.
 - Windows Credential Manager key creation/loading without exposing key bytes to Flutter.
 - Typed bridge readiness status and a protected/disabled Clipboard UI indicator.
+- Event-driven Windows text clipboard listener using `AddClipboardFormatListener` and a message-only window.
+- Dedicated Clipboard SQLite repository that stores nonce and authenticated ciphertext only.
+- Clipboard history duplicate suppression, 20,000-character safety bound and 50-item unpinned retention limit.
+- Clipboard copy, pin, remove and clear-unpinned actions with corrupt-record quarantine.
 
 ## Next
 
-1. Add the Windows clipboard event listener, encrypted repository and retention limits.
-2. Add Clipboard pause controls and sensitive-application exclusions.
-3. Add File Shelf drag-out and missing-file recovery.
-4. Add persistent notes/timers, then Windows audio and Keep Awake services.
+1. Add Clipboard pause controls and sensitive-application exclusions.
+2. Add File Shelf drag-out and missing-file recovery.
+3. Add persistent notes and background-capable timers.
+4. Add Windows audio, Keep Awake, launcher persistence and hotkeys.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, twenty-nine Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native stream event, exercises foreground fullscreen detection and verifies Credential Manager-backed clipboard protection without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.
+The Windows workstation passes `flutter analyze`, thirty-two Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf/Clipboard tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native media and clipboard stream events, exercises foreground fullscreen detection, and verifies Credential Manager-backed clipboard encryption round-trip without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.

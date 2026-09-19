@@ -6,7 +6,7 @@ mod fullscreen;
 mod media;
 
 #[cfg(windows)]
-pub use clipboard::WindowsClipboardKeyStore;
+pub use clipboard::{WindowsClipboardKeyStore, WindowsClipboardListener};
 #[cfg(windows)]
 pub use fullscreen::WindowsFullscreenService;
 #[cfg(windows)]
