@@ -4,7 +4,10 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
+  file_selector_windows
+  irondash_engine_context
   screen_retriever_windows
+  super_native_extensions
   tray_manager
   window_manager
 )

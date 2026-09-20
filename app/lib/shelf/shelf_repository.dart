@@ -7,6 +7,8 @@ abstract interface class ShelfRepository {
 
   Future<void> setPinned(String id, bool pinned);
 
+  Future<void> replaceFile(ShelfItem item);
+
   Future<void> remove(String id);
 
   Future<void> close();

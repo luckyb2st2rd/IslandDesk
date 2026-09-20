@@ -8,6 +8,7 @@ class ShelfItem {
     required this.createdAt,
     required this.pinned,
     this.mimeType,
+    this.isMissing = false,
   });
 
   final String id;
@@ -18,17 +19,26 @@ class ShelfItem {
   final DateTime createdAt;
   final bool pinned;
   final String? mimeType;
+  final bool isMissing;
 
-  ShelfItem copyWith({bool? pinned}) {
+  ShelfItem copyWith({
+    String? filePath,
+    String? filename,
+    String? extension,
+    int? fileSize,
+    bool? pinned,
+    bool? isMissing,
+  }) {
     return ShelfItem(
       id: id,
-      filePath: filePath,
-      filename: filename,
-      extension: extension,
-      fileSize: fileSize,
+      filePath: filePath ?? this.filePath,
+      filename: filename ?? this.filename,
+      extension: extension ?? this.extension,
+      fileSize: fileSize ?? this.fileSize,
       createdAt: createdAt,
       pinned: pinned ?? this.pinned,
       mimeType: mimeType,
+      isMissing: isMissing ?? this.isMissing,
     );
   }
 }

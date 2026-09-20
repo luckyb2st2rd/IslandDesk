@@ -23,6 +23,7 @@ class ShelfController extends ChangeNotifier {
       _items
         ..clear()
         ..addAll(await repository.load());
+      await refreshAvailability(notify: false);
       _sort();
       _errorMessage = null;
     } catch (_) {
@@ -96,6 +97,59 @@ class ShelfController extends ChangeNotifier {
       _errorMessage = 'The shelf item could not be removed';
     }
     notifyListeners();
+  }
+
+  Future<bool> relink(String id, String replacementPath) async {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index < 0) return false;
+    try {
+      final normalized = path.normalize(path.absolute(replacementPath));
+      if (_items.any(
+        (item) =>
+            item.id != id && _pathKey(item.filePath) == _pathKey(normalized),
+      )) {
+        _errorMessage = 'That file is already on the shelf';
+        notifyListeners();
+        return false;
+      }
+      final stat = await File(normalized).stat();
+      if (stat.type != FileSystemEntityType.file) return false;
+      final updated = _items[index].copyWith(
+        filePath: normalized,
+        filename: path.basename(normalized),
+        extension: path.extension(normalized).replaceFirst('.', ''),
+        fileSize: stat.size,
+        isMissing: false,
+      );
+      await _repository?.replaceFile(updated);
+      _items[index] = updated;
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _errorMessage = 'The replacement file could not be linked';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> markMissing(String id) async {
+    final index = _items.indexWhere((item) => item.id == id);
+    if (index < 0 || _items[index].isMissing) return;
+    _items[index] = _items[index].copyWith(isMissing: true);
+    notifyListeners();
+  }
+
+  Future<void> refreshAvailability({bool notify = true}) async {
+    var changed = false;
+    for (var index = 0; index < _items.length; index++) {
+      final missing = !await File(_items[index].filePath).exists();
+      if (_items[index].isMissing != missing) {
+        _items[index] = _items[index].copyWith(isMissing: missing);
+        changed = true;
+      }
+    }
+    if (changed && notify) notifyListeners();
   }
 
   bool _containsPath(String candidate) {

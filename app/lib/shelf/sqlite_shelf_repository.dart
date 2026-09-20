@@ -102,6 +102,26 @@ class SqliteShelfRepository implements ShelfRepository {
   }
 
   @override
+  Future<void> replaceFile(ShelfItem item) async {
+    _database.execute(
+      '''
+        UPDATE shelf_items SET
+          file_path = ?, filename = ?, extension = ?, mime_type = ?,
+          file_size = ?
+        WHERE id = ?
+      ''',
+      [
+        item.filePath,
+        item.filename,
+        item.extension,
+        item.mimeType,
+        item.fileSize,
+        item.id,
+      ],
+    );
+  }
+
+  @override
   Future<void> remove(String id) async {
     _database.execute('DELETE FROM shelf_items WHERE id = ?', [id]);
   }

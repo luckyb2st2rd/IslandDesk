@@ -49,6 +49,32 @@ void main() {
     expect(controller.items.map((item) => item.id), ['pinned', 'recent']);
     controller.dispose();
   });
+
+  test('marks deleted files missing and relinks a replacement', () async {
+    final directory = await Directory.systemTemp.createTemp('islanddesk-shelf');
+    addTearDown(() => directory.delete(recursive: true));
+    final original = File('${directory.path}${Platform.pathSeparator}old.txt');
+    final replacement =
+        File('${directory.path}${Platform.pathSeparator}replacement.md');
+    await original.writeAsString('old');
+    await replacement.writeAsString('replacement');
+    final repository = _MemoryShelfRepository();
+    final controller = ShelfController(repository: repository);
+    await controller.addPaths([original.path]);
+    final id = controller.items.single.id;
+
+    await original.delete();
+    await controller.refreshAvailability();
+    expect(controller.items.single.isMissing, isTrue);
+
+    expect(await controller.relink(id, replacement.path), isTrue);
+    expect(controller.items.single.isMissing, isFalse);
+    expect(controller.items.single.filename, 'replacement.md');
+    expect(controller.items.single.extension, 'md');
+    expect(controller.items.single.fileSize, 11);
+    expect(repository.items.single.filePath, replacement.path);
+    controller.dispose();
+  });
 }
 
 ShelfItem _item(String id, DateTime createdAt, {bool pinned = false}) {
@@ -76,6 +102,12 @@ class _MemoryShelfRepository implements ShelfRepository {
   Future<void> setPinned(String id, bool pinned) async {
     final index = items.indexWhere((item) => item.id == id);
     items[index] = items[index].copyWith(pinned: pinned);
+  }
+
+  @override
+  Future<void> replaceFile(ShelfItem item) async {
+    final index = items.indexWhere((existing) => existing.id == item.id);
+    items[index] = item;
   }
 
   @override

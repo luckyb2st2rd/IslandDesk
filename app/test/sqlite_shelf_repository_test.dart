@@ -27,6 +27,18 @@ void main() {
     loaded = await repository.load();
     expect(loaded.single.pinned, isTrue);
 
+    await repository.replaceFile(
+      loaded.single.copyWith(
+        filePath: 'C:/Documents/relinked.md',
+        filename: 'relinked.md',
+        extension: 'md',
+        fileSize: 84,
+      ),
+    );
+    loaded = await repository.load();
+    expect(loaded.single.filename, 'relinked.md');
+    expect(loaded.single.fileSize, 84);
+
     await repository.remove(item.id);
     expect(await repository.load(), isEmpty);
     await repository.close();
