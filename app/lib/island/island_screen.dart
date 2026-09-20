@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:islanddesk/clipboard/clipboard_controller.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_surface.dart';
+import 'package:islanddesk/launcher/launcher_controller.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/productivity/productivity_controller.dart';
 import 'package:islanddesk/shelf/shelf_controller.dart';
@@ -11,6 +12,7 @@ class IslandScreen extends StatelessWidget {
   const IslandScreen({
     required this.controller,
     required this.mediaController,
+    required this.launcherController,
     required this.shelfController,
     required this.clipboardController,
     required this.productivityController,
@@ -26,6 +28,7 @@ class IslandScreen extends StatelessWidget {
 
   final IslandController controller;
   final MediaController mediaController;
+  final LauncherController launcherController;
   final ShelfController shelfController;
   final ClipboardController clipboardController;
   final ProductivityController productivityController;
@@ -48,6 +51,7 @@ class IslandScreen extends StatelessWidget {
           child: IslandSurface(
             controller: controller,
             mediaController: mediaController,
+            launcherController: launcherController,
             shelfController: shelfController,
             clipboardController: clipboardController,
             productivityController: productivityController,

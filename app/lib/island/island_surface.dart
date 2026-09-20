@@ -5,6 +5,8 @@ import 'package:islanddesk/clipboard/clipboard_controller.dart';
 import 'package:islanddesk/clipboard/clipboard_view.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/launcher/launcher_controller.dart';
+import 'package:islanddesk/launcher/launcher_view.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/productivity/notes_view.dart';
 import 'package:islanddesk/productivity/productivity_controller.dart';
@@ -18,6 +20,7 @@ class IslandSurface extends StatelessWidget {
   const IslandSurface({
     required this.controller,
     required this.mediaController,
+    required this.launcherController,
     required this.shelfController,
     required this.clipboardController,
     required this.productivityController,
@@ -35,6 +38,7 @@ class IslandSurface extends StatelessWidget {
 
   final IslandController controller;
   final MediaController mediaController;
+  final LauncherController launcherController;
   final ShelfController shelfController;
   final ClipboardController clipboardController;
   final ProductivityController productivityController;
@@ -106,6 +110,7 @@ class IslandSurface extends StatelessWidget {
                             key: ValueKey('expanded-content'),
                             controller: controller,
                             mediaController: mediaController,
+                            launcherController: launcherController,
                             shelfController: shelfController,
                             clipboardController: clipboardController,
                             productivityController: productivityController,
@@ -174,6 +179,7 @@ class _ExpandedContent extends StatelessWidget {
   const _ExpandedContent({
     required this.controller,
     required this.mediaController,
+    required this.launcherController,
     required this.shelfController,
     required this.clipboardController,
     required this.productivityController,
@@ -188,6 +194,7 @@ class _ExpandedContent extends StatelessWidget {
 
   final IslandController controller;
   final MediaController mediaController;
+  final LauncherController launcherController;
   final ShelfController shelfController;
   final ClipboardController clipboardController;
   final ProductivityController productivityController;
@@ -287,14 +294,7 @@ class _ExpandedContent extends StatelessWidget {
               ),
               TimerView(controller: productivityController),
               NotesView(controller: productivityController),
-              const _ComingSoonModule(
-                key: ValueKey('launcher-content'),
-                icon: Icons.rocket_launch_outlined,
-                title: 'App Launcher',
-                description:
-                    'Pinned applications and their shortcuts will appear '
-                    'here after launcher persistence is connected.',
-              ),
+              LauncherView(controller: launcherController),
               SystemControlsView(controller: systemControlsController),
             ],
           ),
@@ -331,48 +331,6 @@ class _ModuleButton extends StatelessWidget {
         ),
         icon: Icon(icon, size: 17),
         label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-      ),
-    );
-  }
-}
-
-class _ComingSoonModule extends StatelessWidget {
-  const _ComingSoonModule({
-    required this.icon,
-    required this.title,
-    required this.description,
-    super.key,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 42, color: Colors.white54),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white54),
-            ),
-          ],
-        ),
       ),
     );
   }

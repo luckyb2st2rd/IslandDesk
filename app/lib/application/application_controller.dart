@@ -6,6 +6,7 @@ import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/panel_visibility_controller.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/launcher/launcher_controller.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/productivity/productivity_controller.dart';
 import 'package:islanddesk/settings/app_settings.dart';
@@ -19,6 +20,7 @@ class ApplicationController extends ChangeNotifier {
   ApplicationController({
     IslandController? islandController,
     MediaController? mediaController,
+    LauncherController? launcherController,
     ShelfController? shelfController,
     ClipboardController? clipboardController,
     ProductivityController? productivityController,
@@ -32,6 +34,7 @@ class ApplicationController extends ChangeNotifier {
     this.clipboardSecurityBackend = 'unavailable',
   })  : island = islandController ?? IslandController(),
         media = mediaController ?? MediaController(),
+        launcher = launcherController ?? LauncherController(),
         shelf = shelfController ?? ShelfController(),
         clipboard = clipboardController ??
             ClipboardController(enabled: clipboardSecurityReady),
@@ -53,6 +56,7 @@ class ApplicationController extends ChangeNotifier {
 
   final IslandController island;
   final MediaController media;
+  final LauncherController launcher;
   final ShelfController shelf;
   final ClipboardController clipboard;
   final ProductivityController productivity;
@@ -177,6 +181,7 @@ class ApplicationController extends ChangeNotifier {
   Future<void> close() async {
     await _pendingSave;
     await shelf.close();
+    await launcher.close();
     await clipboard.close();
     await productivity.close();
     await systemControls.close();
@@ -199,6 +204,7 @@ class ApplicationController extends ChangeNotifier {
     panelVisibility.removeListener(_forwardPanelVisibilityChange);
     island.dispose();
     media.dispose();
+    launcher.dispose();
     shelf.dispose();
     clipboard.dispose();
     productivity.dispose();

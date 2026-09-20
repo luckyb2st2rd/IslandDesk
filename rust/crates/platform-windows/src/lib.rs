@@ -3,6 +3,8 @@ mod clipboard;
 #[cfg(windows)]
 mod fullscreen;
 #[cfg(windows)]
+mod launcher;
+#[cfg(windows)]
 mod media;
 #[cfg(windows)]
 mod system_controls;
@@ -11,6 +13,8 @@ mod system_controls;
 pub use clipboard::{WindowsClipboardCapture, WindowsClipboardKeyStore, WindowsClipboardListener};
 #[cfg(windows)]
 pub use fullscreen::WindowsFullscreenService;
+#[cfg(windows)]
+pub use launcher::WindowsLaunchService;
 #[cfg(windows)]
 pub use media::WindowsMediaService;
 #[cfg(windows)]

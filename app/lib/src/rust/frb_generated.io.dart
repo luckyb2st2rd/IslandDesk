@@ -5,6 +5,7 @@
 
 import 'api/clipboard.dart';
 import 'api/fullscreen.dart';
+import 'api/launcher.dart';
 import 'api/media.dart';
 import 'api/monitor.dart';
 import 'api/system.dart';

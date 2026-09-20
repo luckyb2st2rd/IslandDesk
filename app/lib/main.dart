@@ -11,6 +11,8 @@ import 'package:islanddesk/desktop/fullscreen_controller.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
+import 'package:islanddesk/launcher/launcher_controller.dart';
+import 'package:islanddesk/launcher/sqlite_launcher_repository.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/productivity/productivity_controller.dart';
 import 'package:islanddesk/productivity/sqlite_productivity_repository.dart';
@@ -51,10 +53,15 @@ Future<void> main() async {
   final availableMonitors = await monitorService.listAvailableMonitors();
   final mediaController = MediaController();
   await mediaController.start();
+  final launcherController = LauncherController(
+    repository: await SqliteLauncherRepository.open(),
+  );
+  await launcherController.load();
   final fullscreenController = FullscreenController();
   await fullscreenController.start();
   final application = ApplicationController(
     mediaController: mediaController,
+    launcherController: launcherController,
     shelfController: shelfController,
     clipboardController: clipboardController,
     productivityController: productivityController,

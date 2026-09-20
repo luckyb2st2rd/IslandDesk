@@ -25,6 +25,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
     _appListenable = Listenable.merge([
       _controller,
       _controller.media,
+      _controller.launcher,
       _controller.shelf,
       _controller.clipboard,
       _controller.productivity,
@@ -60,6 +61,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
           ApplicationView.island => IslandScreen(
               controller: _controller.island,
               mediaController: _controller.media,
+              launcherController: _controller.launcher,
               shelfController: _controller.shelf,
               clipboardController: _controller.clipboard,
               productivityController: _controller.productivity,

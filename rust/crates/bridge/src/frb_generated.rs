@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.13.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 20737480;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 665846502;
 
 // Section: executor
 
@@ -361,6 +361,74 @@ fn wire__crate__api__fullscreen__is_foreground_fullscreen_impl(
                     std::result::Result::Ok(output_ok)
                 })())
             }
+        },
+    )
+}
+fn wire__crate__api__launcher__launch_application_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "launch_application",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_executable_path = <String>::sse_decode(&mut deserializer);
+            let api_arguments = <Option<String>>::sse_decode(&mut deserializer);
+            let api_working_directory = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, String>((move || {
+                    let output_ok = crate::api::launcher::launch_application(
+                        api_executable_path,
+                        api_arguments,
+                        api_working_directory,
+                    )?;
+                    std::result::Result::Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__launcher__launcher_platform_supported_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "launcher_platform_supported",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Ok::<_, ()>(crate::api::launcher::launcher_platform_supported())?;
+                std::result::Result::Ok(output_ok)
+            })())
         },
     )
 }
@@ -1141,41 +1209,44 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        11 => wire__crate__api__media__media_next_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__media__media_play_pause_impl(port, ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__media__media_previous_impl(port, ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__media__media_seek_impl(port, ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__system_controls__set_input_muted_impl(
+        11 => {
+            wire__crate__api__launcher__launch_application_impl(port, ptr, rust_vec_len, data_len)
+        }
+        13 => wire__crate__api__media__media_next_impl(port, ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__media__media_play_pause_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__media__media_previous_impl(port, ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__media__media_seek_impl(port, ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__system_controls__set_input_muted_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        18 => wire__crate__api__system_controls__set_keep_awake_impl(
+        20 => wire__crate__api__system_controls__set_keep_awake_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        19 => wire__crate__api__system_controls__set_output_muted_impl(
+        21 => wire__crate__api__system_controls__set_output_muted_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        20 => wire__crate__api__system_controls__set_output_volume_impl(
+        22 => wire__crate__api__system_controls__set_output_volume_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        22 => wire__crate__api__clipboard__watch_clipboard_text_impl(
+        24 => wire__crate__api__clipboard__watch_clipboard_text_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        23 => wire__crate__api__media__watch_media_sessions_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__media__watch_media_sessions_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1206,9 +1277,14 @@ fn pde_ffi_dispatcher_sync_impl(
             rust_vec_len,
             data_len,
         ),
-        12 => wire__crate__api__media__media_platform_supported_impl(ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__monitor__resolve_monitor_impl(ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__system_controls__system_controls_platform_supported_impl(
+        12 => wire__crate__api__launcher__launcher_platform_supported_impl(
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        14 => wire__crate__api__media__media_platform_supported_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__monitor__resolve_monitor_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__system_controls__system_controls_platform_supported_impl(
             ptr,
             rust_vec_len,
             data_len,

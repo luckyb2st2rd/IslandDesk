@@ -43,6 +43,8 @@
 - Native Windows Core Audio output volume, speaker mute and microphone mute controls.
 - Dedicated-thread Windows Keep Awake lifecycle that is cleared on disable or application exit.
 - System Controls Flutter UI with external-state refresh and non-fatal device/error handling.
+- Platform-neutral application launch contract and native Windows Shell adapter.
+- Persistent App Launcher with user-selected executables/shortcuts, duplicate prevention, missing-target detection, removal and drag reordering.
 - Native File Shelf drag-in from desktop file managers through a cross-platform drop target.
 - Dedicated SQLite File Shelf metadata repository with duplicate suppression and startup restore.
 - File Shelf pin/remove actions that never modify the original file.
@@ -61,10 +63,10 @@
 
 ## Next
 
-1. Add launcher persistence and global hotkeys.
+1. Add global hotkeys, starting with opening the Island from any application.
 2. Add Windows audio-device selection after the documented endpoint-switching policy is finalized.
 3. Stabilize Linux adapters after the Windows contracts are complete.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, forty Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf/Clipboard/productivity/system-control tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty-four Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native media and clipboard stream events, exercises foreground fullscreen detection and Keep Awake activation/cleanup, and verifies Credential Manager-backed encryption round-trip without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.
+The Windows workstation passes `flutter analyze`, forty-three Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf/Clipboard/productivity/system-control/App Launcher tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty-six Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native media and clipboard stream events, exercises foreground fullscreen detection and Keep Awake activation/cleanup, verifies launcher platform availability, and verifies Credential Manager-backed encryption round-trip without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.
