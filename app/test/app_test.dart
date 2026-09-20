@@ -6,6 +6,8 @@ import 'package:islanddesk/app.dart';
 import 'package:islanddesk/application/application_controller.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/src/rust/api/media.dart';
+import 'package:islanddesk/src/rust/api/system_controls.dart';
+import 'package:islanddesk/system_controls/system_controls_controller.dart';
 
 void main() {
   testWidgets('expands the island when clicked', (tester) async {
@@ -47,9 +49,15 @@ void main() {
   });
 
   testWidgets('switches between all island modules', (tester) async {
+    final systemControls = SystemControlsController(
+      gateway: _FakeSystemControlsGateway(),
+      refreshInterval: const Duration(hours: 1),
+    );
+    await systemControls.start();
     final controller = ApplicationController(
       clipboardSecurityReady: true,
       clipboardSecurityBackend: 'windows_credential_manager',
+      systemControlsController: systemControls,
     );
     await tester.pumpWidget(IslandDeskApp(controller: controller));
     await tester.tap(find.byKey(const ValueKey('island-surface')));
@@ -103,10 +111,48 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('module-system')));
     await tester.pump();
     expect(find.byKey(const ValueKey('system-content')), findsOneWidget);
+    expect(find.byKey(const ValueKey('system-output-volume')), findsOneWidget);
+    expect(find.byKey(const ValueKey('system-input-mute')), findsOneWidget);
+    expect(find.byKey(const ValueKey('system-keep-awake')), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     controller.dispose();
   });
+}
+
+class _FakeSystemControlsGateway implements SystemControlsGateway {
+  @override
+  bool get isSupported => true;
+
+  SystemControlsState get _state => const SystemControlsState(
+        output: AudioEndpointState(
+          available: true,
+          volumePercent: 50,
+          muted: false,
+        ),
+        input: AudioEndpointState(
+          available: true,
+          volumePercent: 75,
+          muted: false,
+        ),
+        keepAwake: false,
+      );
+
+  @override
+  Future<SystemControlsState> currentState() async => _state;
+
+  @override
+  Future<SystemControlsState> setInputMuted(bool muted) async => _state;
+
+  @override
+  Future<SystemControlsState> setKeepAwake(bool active) async => _state;
+
+  @override
+  Future<SystemControlsState> setOutputMuted(bool muted) async => _state;
+
+  @override
+  Future<SystemControlsState> setOutputVolume(int volumePercent) async =>
+      _state;
 }
 
 class _FakeMediaGateway implements MediaGateway {

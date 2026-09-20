@@ -20,6 +20,7 @@ import 'package:islanddesk/shelf/sqlite_shelf_repository.dart';
 import 'package:islanddesk/src/rust/api/clipboard.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
+import 'package:islanddesk/system_controls/system_controls_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +45,8 @@ Future<void> main() async {
         : null,
   );
   await productivityController.start();
+  final systemControlsController = SystemControlsController();
+  await systemControlsController.start();
   final monitorService = MonitorService();
   final availableMonitors = await monitorService.listAvailableMonitors();
   final mediaController = MediaController();
@@ -55,6 +58,7 @@ Future<void> main() async {
     shelfController: shelfController,
     clipboardController: clipboardController,
     productivityController: productivityController,
+    systemControlsController: systemControlsController,
     initialSettings: await settingsRepository.load(),
     settingsRepository: settingsRepository,
     availableMonitors: availableMonitors,

@@ -4,6 +4,7 @@ import 'package:islanddesk/src/rust/api/fullscreen.dart';
 import 'package:islanddesk/src/rust/api/media.dart';
 import 'package:islanddesk/src/rust/api/monitor.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
+import 'package:islanddesk/src/rust/api/system_controls.dart';
 import 'package:islanddesk/src/rust/frb_generated.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -31,6 +32,7 @@ void main() {
     expect(mediaPlatformSupported(), isTrue);
     expect(fullscreenPlatformSupported(), isTrue);
     expect(clipboardSecurityPlatformSupported(), isTrue);
+    expect(systemControlsPlatformSupported(), isTrue);
     final clipboardSecurity = initializeClipboardSecurity();
     expect(clipboardSecurity.supported, isTrue);
     expect(clipboardSecurity.ready, isTrue);
@@ -55,6 +57,10 @@ void main() {
     expect(clipboardEvent.isHeartbeat, isTrue);
     expect(clipboardEvent.text, isNull);
     expect(await isForegroundFullscreen(), isA<bool>());
+    final awakeState = await setKeepAwake(active: true);
+    expect(awakeState.keepAwake, isTrue);
+    final sleepingState = await setKeepAwake(active: false);
+    expect(sleepingState.keepAwake, isFalse);
     final media = await getCurrentMediaSession();
     final event = await watchMediaSessions().first.timeout(
           const Duration(seconds: 5),

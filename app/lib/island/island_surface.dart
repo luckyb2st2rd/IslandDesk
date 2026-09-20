@@ -11,6 +11,8 @@ import 'package:islanddesk/productivity/productivity_controller.dart';
 import 'package:islanddesk/productivity/timer_view.dart';
 import 'package:islanddesk/shelf/shelf_controller.dart';
 import 'package:islanddesk/shelf/shelf_view.dart';
+import 'package:islanddesk/system_controls/system_controls_controller.dart';
+import 'package:islanddesk/system_controls/system_controls_view.dart';
 
 class IslandSurface extends StatelessWidget {
   const IslandSurface({
@@ -19,6 +21,7 @@ class IslandSurface extends StatelessWidget {
     required this.shelfController,
     required this.clipboardController,
     required this.productivityController,
+    required this.systemControlsController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.clipboardSecurityReady = false,
@@ -35,6 +38,7 @@ class IslandSurface extends StatelessWidget {
   final ShelfController shelfController;
   final ClipboardController clipboardController;
   final ProductivityController productivityController;
+  final SystemControlsController systemControlsController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -105,6 +109,7 @@ class IslandSurface extends StatelessWidget {
                             shelfController: shelfController,
                             clipboardController: clipboardController,
                             productivityController: productivityController,
+                            systemControlsController: systemControlsController,
                             coreStatusLabel: coreStatusLabel,
                             clipboardSecurityReady: clipboardSecurityReady,
                             clipboardSecurityBackend: clipboardSecurityBackend,
@@ -172,6 +177,7 @@ class _ExpandedContent extends StatelessWidget {
     required this.shelfController,
     required this.clipboardController,
     required this.productivityController,
+    required this.systemControlsController,
     required this.coreStatusLabel,
     required this.clipboardSecurityReady,
     required this.clipboardSecurityBackend,
@@ -185,6 +191,7 @@ class _ExpandedContent extends StatelessWidget {
   final ShelfController shelfController;
   final ClipboardController clipboardController;
   final ProductivityController productivityController;
+  final SystemControlsController systemControlsController;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
   final String clipboardSecurityBackend;
@@ -288,14 +295,7 @@ class _ExpandedContent extends StatelessWidget {
                     'Pinned applications and their shortcuts will appear '
                     'here after launcher persistence is connected.',
               ),
-              const _ComingSoonModule(
-                key: ValueKey('system-content'),
-                icon: Icons.tune_rounded,
-                title: 'System Controls',
-                description:
-                    'Volume, audio device and Keep Awake require the next '
-                    'native Windows services.',
-              ),
+              SystemControlsView(controller: systemControlsController),
             ],
           ),
         ),

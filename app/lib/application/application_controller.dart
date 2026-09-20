@@ -11,6 +11,7 @@ import 'package:islanddesk/productivity/productivity_controller.dart';
 import 'package:islanddesk/settings/app_settings.dart';
 import 'package:islanddesk/settings/settings_repository.dart';
 import 'package:islanddesk/shelf/shelf_controller.dart';
+import 'package:islanddesk/system_controls/system_controls_controller.dart';
 
 enum ApplicationView { island, settings }
 
@@ -21,6 +22,7 @@ class ApplicationController extends ChangeNotifier {
     ShelfController? shelfController,
     ClipboardController? clipboardController,
     ProductivityController? productivityController,
+    SystemControlsController? systemControlsController,
     PanelVisibilityController? panelVisibilityController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
@@ -34,6 +36,7 @@ class ApplicationController extends ChangeNotifier {
         clipboard = clipboardController ??
             ClipboardController(enabled: clipboardSecurityReady),
         productivity = productivityController ?? ProductivityController(),
+        systemControls = systemControlsController ?? SystemControlsController(),
         panelVisibility =
             panelVisibilityController ?? PanelVisibilityController(),
         _settings = initialSettings,
@@ -53,6 +56,7 @@ class ApplicationController extends ChangeNotifier {
   final ShelfController shelf;
   final ClipboardController clipboard;
   final ProductivityController productivity;
+  final SystemControlsController systemControls;
   final PanelVisibilityController panelVisibility;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -175,6 +179,7 @@ class ApplicationController extends ChangeNotifier {
     await shelf.close();
     await clipboard.close();
     await productivity.close();
+    await systemControls.close();
     await _settingsRepository?.close();
   }
 
@@ -197,6 +202,7 @@ class ApplicationController extends ChangeNotifier {
     shelf.dispose();
     clipboard.dispose();
     productivity.dispose();
+    systemControls.dispose();
     panelVisibility.dispose();
     super.dispose();
   }

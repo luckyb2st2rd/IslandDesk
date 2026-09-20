@@ -3,6 +3,7 @@
 pub mod clipboard;
 pub mod fullscreen;
 pub mod media;
+pub mod system_controls;
 
 /// The visible state of the Island surface.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

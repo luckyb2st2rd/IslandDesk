@@ -5,6 +5,7 @@ import 'package:islanddesk/island/island_surface.dart';
 import 'package:islanddesk/media/media_controller.dart';
 import 'package:islanddesk/productivity/productivity_controller.dart';
 import 'package:islanddesk/shelf/shelf_controller.dart';
+import 'package:islanddesk/system_controls/system_controls_controller.dart';
 
 class IslandScreen extends StatelessWidget {
   const IslandScreen({
@@ -13,6 +14,7 @@ class IslandScreen extends StatelessWidget {
     required this.shelfController,
     required this.clipboardController,
     required this.productivityController,
+    required this.systemControlsController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.clipboardSecurityReady = false,
@@ -27,6 +29,7 @@ class IslandScreen extends StatelessWidget {
   final ShelfController shelfController;
   final ClipboardController clipboardController;
   final ProductivityController productivityController;
+  final SystemControlsController systemControlsController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -48,6 +51,7 @@ class IslandScreen extends StatelessWidget {
             shelfController: shelfController,
             clipboardController: clipboardController,
             productivityController: productivityController,
+            systemControlsController: systemControlsController,
             animationsEnabled: animationsEnabled,
             coreStatusLabel: coreStatusLabel,
             clipboardSecurityReady: clipboardSecurityReady,

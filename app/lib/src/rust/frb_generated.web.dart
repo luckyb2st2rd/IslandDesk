@@ -11,6 +11,7 @@ import 'api/fullscreen.dart';
 import 'api/media.dart';
 import 'api/monitor.dart';
 import 'api/system.dart';
+import 'api/system_controls.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -37,6 +38,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String dco_decode_String(dynamic raw);
+
+  @protected
+  AudioEndpointState dco_decode_audio_endpoint_state(dynamic raw);
 
   @protected
   bool dco_decode_bool(dynamic raw);
@@ -96,6 +100,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MonitorResolution? dco_decode_opt_box_autoadd_monitor_resolution(dynamic raw);
 
   @protected
+  SystemControlsState dco_decode_system_controls_state(dynamic raw);
+
+  @protected
   BigInt dco_decode_u_64(dynamic raw);
 
   @protected
@@ -119,6 +126,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
+
+  @protected
+  AudioEndpointState sse_decode_audio_endpoint_state(
+      SseDeserializer deserializer);
 
   @protected
   bool sse_decode_bool(SseDeserializer deserializer);
@@ -186,6 +197,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       SseDeserializer deserializer);
 
   @protected
+  SystemControlsState sse_decode_system_controls_state(
+      SseDeserializer deserializer);
+
+  @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer);
 
   @protected
@@ -208,6 +223,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_audio_endpoint_state(
+      AudioEndpointState self, SseSerializer serializer);
 
   @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
@@ -276,6 +295,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_opt_box_autoadd_monitor_resolution(
       MonitorResolution? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_system_controls_state(
+      SystemControlsState self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);
