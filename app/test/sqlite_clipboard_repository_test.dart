@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:islanddesk/clipboard/clipboard_item.dart';
+import 'package:islanddesk/clipboard/clipboard_preferences.dart';
 import 'package:islanddesk/clipboard/sqlite_clipboard_repository.dart';
 import 'package:islanddesk/src/rust/api/clipboard.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -27,6 +28,12 @@ void main() {
     await repository.setPinned(first.id, true);
     await repository.save(second);
     await repository.save(third);
+    await repository.savePreferences(
+      const ClipboardPreferences(
+        capturePaused: true,
+        excludedApplications: ['vault.exe'],
+      ),
+    );
     await repository.close();
 
     final rawDatabase = sqlite3.open(databasePath);
@@ -54,6 +61,9 @@ void main() {
       'second text',
     ]);
     expect(loaded.first.pinned, isTrue);
+    final preferences = await reopened.loadPreferences();
+    expect(preferences.capturePaused, isTrue);
+    expect(preferences.excludedApplications, ['vault.exe']);
     await reopened.close();
     await directory.delete(recursive: true);
   });

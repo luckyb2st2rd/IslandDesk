@@ -26,8 +26,33 @@ String decryptClipboardText(
     RustLib.instance.api.crateApiClipboardDecryptClipboardText(
         itemId: itemId, nonce: nonce, ciphertext: ciphertext);
 
-Stream<String?> watchClipboardText() =>
+Stream<ClipboardCaptureEvent> watchClipboardText() =>
     RustLib.instance.api.crateApiClipboardWatchClipboardText();
+
+class ClipboardCaptureEvent {
+  final String? text;
+  final String sourceApplication;
+  final bool isHeartbeat;
+
+  const ClipboardCaptureEvent({
+    this.text,
+    required this.sourceApplication,
+    required this.isHeartbeat,
+  });
+
+  @override
+  int get hashCode =>
+      text.hashCode ^ sourceApplication.hashCode ^ isHeartbeat.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClipboardCaptureEvent &&
+          runtimeType == other.runtimeType &&
+          text == other.text &&
+          sourceApplication == other.sourceApplication &&
+          isHeartbeat == other.isHeartbeat;
+}
 
 class ClipboardEncryptedData {
   final Uint8List nonce;

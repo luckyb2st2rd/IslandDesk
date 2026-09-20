@@ -6,20 +6,24 @@ use islanddesk_core::clipboard::{
 use keyring::{Entry, Error};
 use windows::{
     Win32::{
-        Foundation::{HGLOBAL, HWND},
+        Foundation::{CloseHandle, HGLOBAL, HWND},
         System::{
             DataExchange::{
                 AddClipboardFormatListener, CloseClipboard, GetClipboardData,
                 IsClipboardFormatAvailable, OpenClipboard, RemoveClipboardFormatListener,
             },
             Memory::{GlobalLock, GlobalSize, GlobalUnlock},
+            Threading::{
+                OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW,
+            },
         },
         UI::WindowsAndMessaging::{
-            CreateWindowExW, DestroyWindow, GetMessageW, HWND_MESSAGE, KillTimer, MSG, SetTimer,
-            WINDOW_EX_STYLE, WINDOW_STYLE, WM_CLIPBOARDUPDATE, WM_TIMER,
+            CreateWindowExW, DestroyWindow, GetForegroundWindow, GetMessageW,
+            GetWindowThreadProcessId, HWND_MESSAGE, KillTimer, MSG, SetTimer, WINDOW_EX_STYLE,
+            WINDOW_STYLE, WM_CLIPBOARDUPDATE, WM_TIMER,
         },
     },
-    core::w,
+    core::{PWSTR, w},
 };
 
 const KEYRING_SERVICE: &str = "IslandDesk";
@@ -32,11 +36,27 @@ pub struct WindowsClipboardKeyStore;
 
 pub struct WindowsClipboardListener;
 
+#[derive(Clone)]
+pub struct WindowsClipboardCapture {
+    pub text: Option<String>,
+    pub source_application: String,
+    pub is_heartbeat: bool,
+}
+
 impl WindowsClipboardListener {
-    pub fn watch_text(&self, mut emit: impl FnMut(Option<String>) -> bool) -> Result<(), String> {
+    pub fn watch_text(
+        &self,
+        mut emit: impl FnMut(WindowsClipboardCapture) -> bool,
+    ) -> Result<(), String> {
         let window = ClipboardWindow::create()?;
         let mut current = read_text(window.handle()).unwrap_or(None);
-        if !emit(current.clone()) {
+        let mut source_application = String::new();
+        let mut pending_source = None;
+        if !emit(WindowsClipboardCapture {
+            text: None,
+            source_application: String::new(),
+            is_heartbeat: true,
+        }) {
             return Ok(());
         }
 
@@ -49,16 +69,52 @@ impl WindowsClipboardListener {
             if !result.as_bool() {
                 return Ok(());
             }
-            if matches!(message.message, WM_CLIPBOARDUPDATE | WM_TIMER) {
-                // Retrying on the heartbeat recovers from another application
-                // holding the clipboard during the original update event. The
-                // duplicate also releases a cancelled Dart stream while idle.
-                if let Ok(next) = read_text(window.handle()) {
-                    current = next;
+            let capture = match message.message {
+                WM_CLIPBOARDUPDATE => {
+                    let event_source = foreground_process_name().unwrap_or_default();
+                    match read_text(window.handle()) {
+                        Ok(next) => {
+                            current = next;
+                            source_application = event_source;
+                            pending_source = None;
+                            WindowsClipboardCapture {
+                                text: current.clone(),
+                                source_application: source_application.clone(),
+                                is_heartbeat: false,
+                            }
+                        }
+                        Err(_) => {
+                            pending_source = Some(event_source);
+                            continue;
+                        }
+                    }
                 }
-                if !emit(current.clone()) {
-                    return Ok(());
+                WM_TIMER => {
+                    if let Some(event_source) = pending_source.as_ref() {
+                        if let Ok(next) = read_text(window.handle()) {
+                            current = next;
+                            source_application = event_source.clone();
+                            pending_source = None;
+                            WindowsClipboardCapture {
+                                text: current.clone(),
+                                source_application: source_application.clone(),
+                                is_heartbeat: false,
+                            }
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        WindowsClipboardCapture {
+                            text: current.clone(),
+                            source_application: source_application.clone(),
+                            is_heartbeat: true,
+                        }
+                    }
                 }
+                _ => continue,
+            };
+            if !emit(capture) {
+                return Ok(());
             }
         }
     }
@@ -153,6 +209,40 @@ fn read_open_clipboard_text(format: u32) -> Result<Option<String>, String> {
     Ok((!text.is_empty()).then_some(text))
 }
 
+fn foreground_process_name() -> Option<String> {
+    let window = unsafe { GetForegroundWindow() };
+    if window.0.is_null() {
+        return None;
+    }
+    let mut process_id = 0;
+    if unsafe { GetWindowThreadProcessId(window, Some(&mut process_id)) } == 0 || process_id == 0 {
+        return None;
+    }
+    let process =
+        unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, process_id) }.ok()?;
+    let mut buffer = vec![0u16; 32_768];
+    let mut length = buffer.len() as u32;
+    let result = unsafe {
+        QueryFullProcessImageNameW(
+            process,
+            Default::default(),
+            PWSTR(buffer.as_mut_ptr()),
+            &mut length,
+        )
+    };
+    let _ = unsafe { CloseHandle(process) };
+    result.ok()?;
+    let path = String::from_utf16_lossy(&buffer[..length as usize]);
+    process_name_from_path(&path)
+}
+
+fn process_name_from_path(path: &str) -> Option<String> {
+    path.rsplit(['\\', '/'])
+        .next()
+        .filter(|name| !name.is_empty())
+        .map(str::to_owned)
+}
+
 impl ClipboardKeyStore for WindowsClipboardKeyStore {
     fn load_or_create_key(&self) -> Result<[u8; CLIPBOARD_KEY_LENGTH], ClipboardKeyStoreError> {
         if let Some(key) = CACHED_KEY.get() {
@@ -189,4 +279,18 @@ fn unavailable(operation: &str, error: Error) -> ClipboardKeyStoreError {
     ClipboardKeyStoreError::Unavailable(format!(
         "Windows Credential Manager {operation} failed: {error}"
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::process_name_from_path;
+
+    #[test]
+    fn keeps_only_the_process_filename() {
+        assert_eq!(
+            process_name_from_path(r"C:\Program Files\Vault\vault.exe").as_deref(),
+            Some("vault.exe")
+        );
+        assert_eq!(process_name_from_path(""), None);
+    }
 }

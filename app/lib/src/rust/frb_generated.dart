@@ -125,7 +125,7 @@ abstract class RustLibApi extends BaseApi {
       String? activeId,
       String? fixedId});
 
-  Stream<String?> crateApiClipboardWatchClipboardText();
+  Stream<ClipboardCaptureEvent> crateApiClipboardWatchClipboardText();
 
   Stream<MediaSession?> crateApiMediaWatchMediaSessions();
 }
@@ -508,12 +508,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Stream<String?> crateApiClipboardWatchClipboardText() {
-    final sink = RustStreamSink<String?>();
+  Stream<ClipboardCaptureEvent> crateApiClipboardWatchClipboardText() {
+    final sink = RustStreamSink<ClipboardCaptureEvent>();
     unawaited(handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_StreamSink_opt_String_Sse(sink, serializer);
+        sse_encode_StreamSink_clipboard_capture_event_Sse(sink, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
             funcId: 16, port: port_);
       },
@@ -569,7 +569,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<String?> dco_decode_StreamSink_opt_String_Sse(dynamic raw) {
+  RustStreamSink<ClipboardCaptureEvent>
+      dco_decode_StreamSink_clipboard_capture_event_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -603,6 +604,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   MonitorResolution dco_decode_box_autoadd_monitor_resolution(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_monitor_resolution(raw);
+  }
+
+  @protected
+  ClipboardCaptureEvent dco_decode_clipboard_capture_event(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return ClipboardCaptureEvent(
+      text: dco_decode_opt_String(arr[0]),
+      sourceApplication: dco_decode_String(arr[1]),
+      isHeartbeat: dco_decode_bool(arr[2]),
+    );
   }
 
   @protected
@@ -774,8 +788,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  RustStreamSink<String?> sse_decode_StreamSink_opt_String_Sse(
-      SseDeserializer deserializer) {
+  RustStreamSink<ClipboardCaptureEvent>
+      sse_decode_StreamSink_clipboard_capture_event_Sse(
+          SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     throw UnimplementedError('Unreachable ()');
   }
@@ -813,6 +828,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_monitor_resolution(deserializer));
+  }
+
+  @protected
+  ClipboardCaptureEvent sse_decode_clipboard_capture_event(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_text = sse_decode_opt_String(deserializer);
+    var var_sourceApplication = sse_decode_String(deserializer);
+    var var_isHeartbeat = sse_decode_bool(deserializer);
+    return ClipboardCaptureEvent(
+        text: var_text,
+        sourceApplication: var_sourceApplication,
+        isHeartbeat: var_isHeartbeat);
   }
 
   @protected
@@ -1015,13 +1043,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_StreamSink_opt_String_Sse(
-      RustStreamSink<String?> self, SseSerializer serializer) {
+  void sse_encode_StreamSink_clipboard_capture_event_Sse(
+      RustStreamSink<ClipboardCaptureEvent> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
         self.setupAndSerialize(
             codec: SseCodec(
-          decodeSuccessData: sse_decode_opt_String,
+          decodeSuccessData: sse_decode_clipboard_capture_event,
           decodeErrorData: sse_decode_AnyhowException,
         )),
         serializer);
@@ -1064,6 +1092,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       MonitorResolution self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_monitor_resolution(self, serializer);
+  }
+
+  @protected
+  void sse_encode_clipboard_capture_event(
+      ClipboardCaptureEvent self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_String(self.text, serializer);
+    sse_encode_String(self.sourceApplication, serializer);
+    sse_encode_bool(self.isHeartbeat, serializer);
   }
 
   @protected

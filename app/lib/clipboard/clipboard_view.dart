@@ -33,10 +33,42 @@ class ClipboardView extends StatelessWidget {
             Chip(
               visualDensity: VisualDensity.compact,
               avatar: Icon(
-                securityReady ? Icons.lock_rounded : Icons.lock_open_rounded,
+                controller.capturePaused
+                    ? Icons.pause_rounded
+                    : securityReady
+                        ? Icons.lock_rounded
+                        : Icons.lock_open_rounded,
                 size: 14,
               ),
-              label: Text(securityReady ? 'Protected' : 'History off'),
+              label: Text(
+                controller.capturePaused
+                    ? 'Paused'
+                    : securityReady
+                        ? 'Protected'
+                        : 'History off',
+              ),
+            ),
+            IconButton(
+              key: const ValueKey('clipboard-pause'),
+              tooltip: controller.capturePaused
+                  ? 'Resume clipboard capture'
+                  : 'Pause clipboard capture',
+              onPressed: securityReady
+                  ? () => unawaited(
+                        controller.setCapturePaused(!controller.capturePaused),
+                      )
+                  : null,
+              icon: Icon(
+                controller.capturePaused
+                    ? Icons.play_arrow_rounded
+                    : Icons.pause_rounded,
+              ),
+            ),
+            IconButton(
+              key: const ValueKey('clipboard-exclusions'),
+              tooltip: 'Sensitive application exclusions',
+              onPressed: securityReady ? () => _showExclusions(context) : null,
+              icon: const Icon(Icons.shield_outlined),
             ),
             IconButton(
               key: const ValueKey('clipboard-clear'),
@@ -57,7 +89,9 @@ class ClipboardView extends StatelessWidget {
                   key: const ValueKey('clipboard-content'),
                   child: Text(
                     controller.isListening
-                        ? 'Copy text to add it here'
+                        ? controller.capturePaused
+                            ? 'Clipboard capture is paused'
+                            : 'Copy text to add it here'
                         : 'Secure clipboard history is unavailable',
                     style: const TextStyle(color: Colors.white54),
                   ),
@@ -118,7 +152,7 @@ class ClipboardView extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           securityReady
-              ? 'Encrypted with AES-256-GCM; key protected by ${_backendLabel(securityBackend)}.'
+              ? 'AES-256-GCM • ${controller.excludedApplications.length} sensitive apps excluded • key in ${_backendLabel(securityBackend)}.'
               : 'History stays disabled until secure key storage is available.',
           style: const TextStyle(fontSize: 11, color: Colors.white38),
         ),
@@ -126,8 +160,101 @@ class ClipboardView extends StatelessWidget {
     );
   }
 
+  Future<void> _showExclusions(BuildContext context) async {
+    final result = await showDialog<List<String>>(
+      context: context,
+      builder: (context) => _ClipboardExclusionsDialog(
+        initialApplications: controller.excludedApplications,
+      ),
+    );
+    if (result != null) {
+      await controller.setExcludedApplications(result);
+    }
+  }
+
   static String _backendLabel(String backend) => switch (backend) {
         'windows_credential_manager' => 'Windows Credential Manager',
         _ => 'the operating system credential store',
       };
+}
+
+class _ClipboardExclusionsDialog extends StatefulWidget {
+  const _ClipboardExclusionsDialog({required this.initialApplications});
+
+  final List<String> initialApplications;
+
+  @override
+  State<_ClipboardExclusionsDialog> createState() =>
+      _ClipboardExclusionsDialogState();
+}
+
+class _ClipboardExclusionsDialogState
+    extends State<_ClipboardExclusionsDialog> {
+  late final TextEditingController _editor;
+
+  @override
+  void initState() {
+    super.initState();
+    _editor = TextEditingController(
+      text: widget.initialApplications.join('\n'),
+    );
+  }
+
+  @override
+  void dispose() {
+    _editor.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Sensitive applications'),
+      content: SizedBox(
+        width: 420,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Clipboard changes copied while one of these applications '
+                'is active will not be saved.',
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                key: const ValueKey('clipboard-exclusions-editor'),
+                controller: _editor,
+                minLines: 4,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  labelText: 'Executable names',
+                  hintText: 'bitwarden.exe',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          key: const ValueKey('clipboard-exclusions-save'),
+          onPressed: () => Navigator.pop(
+            context,
+            _editor.text
+                .split(RegExp(r'[,;\n]'))
+                .map((value) => value.trim())
+                .where((value) => value.isNotEmpty)
+                .toList(),
+          ),
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
 }

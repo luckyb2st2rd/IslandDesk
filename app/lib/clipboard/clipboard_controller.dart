@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:islanddesk/clipboard/clipboard_gateway.dart';
 import 'package:islanddesk/clipboard/clipboard_item.dart';
+import 'package:islanddesk/clipboard/clipboard_preferences.dart';
 import 'package:islanddesk/clipboard/clipboard_repository.dart';
 
 class ClipboardController extends ChangeNotifier {
@@ -21,14 +22,18 @@ class ClipboardController extends ChangeNotifier {
   final int maxTextLength;
   final int maxUnpinnedItems;
   final List<ClipboardItem> _items = [];
-  StreamSubscription<String?>? _subscription;
+  StreamSubscription<ClipboardEvent>? _subscription;
   Future<void> _pendingWrite = Future.value();
   String? _errorMessage;
   bool _started = false;
   int _idSequence = 0;
+  ClipboardPreferences _preferences = const ClipboardPreferences();
 
   List<ClipboardItem> get items => List.unmodifiable(_items);
   String? get errorMessage => _errorMessage;
+  bool get capturePaused => _preferences.capturePaused;
+  List<String> get excludedApplications =>
+      List.unmodifiable(_preferences.excludedApplications);
   bool get isListening =>
       enabled && _subscription != null && _gateway.isSupported;
 
@@ -39,6 +44,13 @@ class ClipboardController extends ChangeNotifier {
       _items
         ..clear()
         ..addAll(await _repository?.load() ?? const []);
+      _preferences =
+          await _repository?.loadPreferences() ?? const ClipboardPreferences();
+      _preferences = _preferences.copyWith(
+        excludedApplications: _normalizedApplications(
+          _preferences.excludedApplications,
+        ),
+      );
       _sort();
       _errorMessage = null;
     } catch (_) {
@@ -55,11 +67,17 @@ class ClipboardController extends ChangeNotifier {
     );
   }
 
-  void _queueText(String? text) {
-    _pendingWrite = _pendingWrite.then((_) => _acceptText(text));
+  void _queueText(ClipboardEvent event) {
+    _pendingWrite = _pendingWrite.then((_) => _acceptEvent(event));
   }
 
-  Future<void> _acceptText(String? text) async {
+  Future<void> _acceptEvent(ClipboardEvent event) async {
+    if (event.isHeartbeat ||
+        capturePaused ||
+        _isExcluded(event.sourceApplication)) {
+      return;
+    }
+    final text = event.text;
     if (text == null || text.trim().isEmpty) return;
     final safeText =
         text.length > maxTextLength ? text.substring(0, maxTextLength) : text;
@@ -81,6 +99,41 @@ class ClipboardController extends ChangeNotifier {
       _errorMessage = 'Clipboard item could not be encrypted';
     }
     notifyListeners();
+  }
+
+  Future<void> setCapturePaused(bool paused) async {
+    if (_preferences.capturePaused == paused) return;
+    final updated = _preferences.copyWith(capturePaused: paused);
+    try {
+      await _repository?.savePreferences(updated);
+      _preferences = updated;
+      _errorMessage = null;
+    } catch (_) {
+      _errorMessage = 'Clipboard pause state could not be saved';
+    }
+    notifyListeners();
+  }
+
+  Future<void> setExcludedApplications(Iterable<String> applications) async {
+    final updated = _preferences.copyWith(
+      excludedApplications: _normalizedApplications(applications),
+    );
+    try {
+      await _repository?.savePreferences(updated);
+      _preferences = updated;
+      _errorMessage = null;
+    } catch (_) {
+      _errorMessage = 'Sensitive application exclusions could not be saved';
+    }
+    notifyListeners();
+  }
+
+  bool _isExcluded(String application) {
+    final key = _applicationKey(application);
+    return key.isNotEmpty &&
+        _preferences.excludedApplications.any(
+          (excluded) => _applicationKey(excluded) == key,
+        );
   }
 
   Future<void> togglePinned(String id) async {
@@ -134,6 +187,25 @@ class ClipboardController extends ChangeNotifier {
       unpinnedCount++;
       return unpinnedCount > maxUnpinnedItems;
     });
+  }
+
+  static List<String> _normalizedApplications(Iterable<String> applications) {
+    final values = applications
+        .map((application) => application.trim().replaceAll('\\', '/'))
+        .map((application) => application.split('/').last.toLowerCase())
+        .where((application) => application.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    return values;
+  }
+
+  static String _applicationKey(String application) {
+    final normalized =
+        application.trim().replaceAll('\\', '/').split('/').last.toLowerCase();
+    return normalized.endsWith('.exe')
+        ? normalized.substring(0, normalized.length - 4)
+        : normalized;
   }
 
   Future<void> close() async {

@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:islanddesk/clipboard/clipboard_item.dart';
+import 'package:islanddesk/clipboard/clipboard_preferences.dart';
 import 'package:islanddesk/clipboard/clipboard_repository.dart';
 import 'package:islanddesk/src/rust/api/clipboard.dart';
 import 'package:path/path.dart' as path;
@@ -43,6 +45,13 @@ class SqliteClipboardRepository implements ClipboardRepository {
         ciphertext BLOB NOT NULL,
         created_at INTEGER NOT NULL,
         pinned INTEGER NOT NULL CHECK (pinned IN (0, 1))
+      ) STRICT
+    ''');
+    _database.execute('''
+      CREATE TABLE IF NOT EXISTS clipboard_preferences (
+        singleton INTEGER NOT NULL PRIMARY KEY CHECK (singleton = 1),
+        capture_paused INTEGER NOT NULL CHECK (capture_paused IN (0, 1)),
+        excluded_applications TEXT NOT NULL
       ) STRICT
     ''');
   }
@@ -114,6 +123,27 @@ class SqliteClipboardRepository implements ClipboardRepository {
   }
 
   @override
+  Future<ClipboardPreferences> loadPreferences() async {
+    final rows = _database.select('''
+      SELECT capture_paused, excluded_applications
+      FROM clipboard_preferences
+      WHERE singleton = 1
+    ''');
+    if (rows.isEmpty) return const ClipboardPreferences();
+    try {
+      final decoded =
+          jsonDecode(rows.single['excluded_applications'] as String);
+      if (decoded is! List) return const ClipboardPreferences();
+      return ClipboardPreferences(
+        capturePaused: rows.single['capture_paused'] == 1,
+        excludedApplications: decoded.whereType<String>().toList(),
+      );
+    } catch (_) {
+      return const ClipboardPreferences();
+    }
+  }
+
+  @override
   Future<void> save(ClipboardItem item) async {
     final encrypted = _crypto.encrypt(item.id, item.text);
     _database.execute(
@@ -160,6 +190,24 @@ class SqliteClipboardRepository implements ClipboardRepository {
   @override
   Future<void> clearUnpinned() async {
     _database.execute('DELETE FROM clipboard_items WHERE pinned = 0');
+  }
+
+  @override
+  Future<void> savePreferences(ClipboardPreferences preferences) async {
+    _database.execute(
+      '''
+        INSERT INTO clipboard_preferences (
+          singleton, capture_paused, excluded_applications
+        ) VALUES (1, ?, ?)
+        ON CONFLICT(singleton) DO UPDATE SET
+          capture_paused = excluded.capture_paused,
+          excluded_applications = excluded.excluded_applications
+      ''',
+      [
+        preferences.capturePaused ? 1 : 0,
+        jsonEncode(preferences.excludedApplications),
+      ],
+    );
   }
 
   @override

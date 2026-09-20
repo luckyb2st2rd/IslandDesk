@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:islanddesk/clipboard/clipboard_controller.dart';
 import 'package:islanddesk/clipboard/clipboard_gateway.dart';
 import 'package:islanddesk/clipboard/clipboard_item.dart';
+import 'package:islanddesk/clipboard/clipboard_preferences.dart';
 import 'package:islanddesk/clipboard/clipboard_repository.dart';
 
 void main() {
@@ -53,6 +54,38 @@ void main() {
     controller.dispose();
     await gateway.close();
   });
+
+  test('persists pause and ignores sensitive application events', () async {
+    final gateway = _FakeClipboardGateway();
+    final repository = _MemoryClipboardRepository();
+    final controller = ClipboardController(
+      enabled: true,
+      gateway: gateway,
+      repository: repository,
+    );
+    await controller.start();
+
+    await controller.setCapturePaused(true);
+    gateway.add('paused value', sourceApplication: 'notepad.exe');
+    await _flushEvents();
+    expect(controller.items, isEmpty);
+
+    await controller.setCapturePaused(false);
+    gateway.add(
+      'password manager value',
+      sourceApplication: r'C:\Apps\Bitwarden.exe',
+    );
+    gateway.add('allowed value', sourceApplication: 'notepad.exe');
+    await _flushEvents();
+
+    expect(controller.items.single.text, 'allowed value');
+    expect(repository.preferences.capturePaused, isFalse);
+    expect(
+        repository.preferences.excludedApplications, contains('bitwarden.exe'));
+    await controller.close();
+    controller.dispose();
+    await gateway.close();
+  });
 }
 
 Future<void> _flushEvents() async {
@@ -62,24 +95,34 @@ Future<void> _flushEvents() async {
 }
 
 class _FakeClipboardGateway implements ClipboardGateway {
-  final _controller = StreamController<String?>.broadcast(sync: true);
+  final _controller = StreamController<ClipboardEvent>.broadcast(sync: true);
 
   @override
   bool get isSupported => true;
 
-  void add(String text) => _controller.add(text);
+  void add(String text, {String sourceApplication = 'test.exe'}) =>
+      _controller.add(
+        ClipboardEvent(
+          text: text,
+          sourceApplication: sourceApplication,
+        ),
+      );
 
   Future<void> close() => _controller.close();
 
   @override
-  Stream<String?> watchText() => _controller.stream;
+  Stream<ClipboardEvent> watchText() => _controller.stream;
 }
 
 class _MemoryClipboardRepository implements ClipboardRepository {
   final items = <ClipboardItem>[];
+  ClipboardPreferences preferences = const ClipboardPreferences();
 
   @override
   Future<List<ClipboardItem>> load() async => List.of(items);
+
+  @override
+  Future<ClipboardPreferences> loadPreferences() async => preferences;
 
   @override
   Future<void> save(ClipboardItem item) async => items.add(item);
@@ -98,6 +141,11 @@ class _MemoryClipboardRepository implements ClipboardRepository {
   @override
   Future<void> clearUnpinned() async {
     items.removeWhere((item) => !item.pinned);
+  }
+
+  @override
+  Future<void> savePreferences(ClipboardPreferences value) async {
+    preferences = value;
   }
 
   @override

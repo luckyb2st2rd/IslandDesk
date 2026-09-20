@@ -64,6 +64,18 @@ void main() {
     expect(find.byKey(const ValueKey('clipboard-content')), findsOneWidget);
     expect(find.text('Protected'), findsOneWidget);
     expect(find.textContaining('Windows Credential Manager'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('clipboard-pause')));
+    await tester.pump();
+    expect(find.text('Paused'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('clipboard-exclusions')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('clipboard-exclusions-editor')),
+      'vault.exe',
+    );
+    await tester.tap(find.byKey(const ValueKey('clipboard-exclusions-save')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1 sensitive apps excluded'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('module-timer')));
     await tester.pump();

@@ -26,7 +26,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
-  RustStreamSink<String?> dco_decode_StreamSink_opt_String_Sse(dynamic raw);
+  RustStreamSink<ClipboardCaptureEvent>
+      dco_decode_StreamSink_clipboard_capture_event_Sse(dynamic raw);
 
   @protected
   RustStreamSink<MediaSession?>
@@ -43,6 +44,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   MonitorResolution dco_decode_box_autoadd_monitor_resolution(dynamic raw);
+
+  @protected
+  ClipboardCaptureEvent dco_decode_clipboard_capture_event(dynamic raw);
 
   @protected
   ClipboardEncryptedData dco_decode_clipboard_encrypted_data(dynamic raw);
@@ -102,8 +106,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<String?> sse_decode_StreamSink_opt_String_Sse(
-      SseDeserializer deserializer);
+  RustStreamSink<ClipboardCaptureEvent>
+      sse_decode_StreamSink_clipboard_capture_event_Sse(
+          SseDeserializer deserializer);
 
   @protected
   RustStreamSink<MediaSession?>
@@ -122,6 +127,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   MonitorResolution sse_decode_box_autoadd_monitor_resolution(
+      SseDeserializer deserializer);
+
+  @protected
+  ClipboardCaptureEvent sse_decode_clipboard_capture_event(
       SseDeserializer deserializer);
 
   @protected
@@ -188,8 +197,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       AnyhowException self, SseSerializer serializer);
 
   @protected
-  void sse_encode_StreamSink_opt_String_Sse(
-      RustStreamSink<String?> self, SseSerializer serializer);
+  void sse_encode_StreamSink_clipboard_capture_event_Sse(
+      RustStreamSink<ClipboardCaptureEvent> self, SseSerializer serializer);
 
   @protected
   void sse_encode_StreamSink_opt_box_autoadd_media_session_Sse(
@@ -208,6 +217,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_monitor_resolution(
       MonitorResolution self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_clipboard_capture_event(
+      ClipboardCaptureEvent self, SseSerializer serializer);
 
   @protected
   void sse_encode_clipboard_encrypted_data(

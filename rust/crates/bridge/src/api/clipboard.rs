@@ -17,6 +17,12 @@ pub struct ClipboardEncryptedData {
     pub ciphertext: Vec<u8>,
 }
 
+pub struct ClipboardCaptureEvent {
+    pub text: Option<String>,
+    pub source_application: String,
+    pub is_heartbeat: bool,
+}
+
 #[flutter_rust_bridge::frb(sync)]
 pub fn clipboard_security_platform_supported() -> bool {
     cfg!(windows)
@@ -56,8 +62,8 @@ pub fn decrypt_clipboard_text(
         .map_err(|error| format!("clipboard decryption failed: {error:?}"))
 }
 
-pub fn watch_clipboard_text(sink: StreamSink<Option<String>>) -> Result<(), String> {
-    watch(move |text| sink.add(text).is_ok())
+pub fn watch_clipboard_text(sink: StreamSink<ClipboardCaptureEvent>) -> Result<(), String> {
+    watch(move |event| sink.add(event).is_ok())
 }
 
 #[cfg(windows)]
@@ -74,13 +80,23 @@ fn clipboard_cipher() -> Result<ClipboardCipher, String> {
 }
 
 #[cfg(windows)]
-fn watch(emit: impl FnMut(Option<String>) -> bool) -> Result<(), String> {
-    islanddesk_platform_windows::WindowsClipboardListener.watch_text(emit)
+fn watch(mut emit: impl FnMut(ClipboardCaptureEvent) -> bool) -> Result<(), String> {
+    islanddesk_platform_windows::WindowsClipboardListener.watch_text(move |event| {
+        emit(ClipboardCaptureEvent {
+            text: event.text,
+            source_application: event.source_application,
+            is_heartbeat: event.is_heartbeat,
+        })
+    })
 }
 
 #[cfg(not(windows))]
-fn watch(mut emit: impl FnMut(Option<String>) -> bool) -> Result<(), String> {
-    let _ = emit(None);
+fn watch(mut emit: impl FnMut(ClipboardCaptureEvent) -> bool) -> Result<(), String> {
+    let _ = emit(ClipboardCaptureEvent {
+        text: None,
+        source_application: String::new(),
+        is_heartbeat: true,
+    });
     Ok(())
 }
 

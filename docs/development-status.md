@@ -48,14 +48,17 @@
 - Dedicated Clipboard SQLite repository that stores nonce and authenticated ciphertext only.
 - Clipboard history duplicate suppression, 20,000-character safety bound and 50-item unpinned retention limit.
 - Clipboard copy, pin, remove and clear-unpinned actions with corrupt-record quarantine.
+- Persisted Clipboard capture pause/resume control.
+- Foreground-process attribution and configurable sensitive-application exclusions applied before persistence.
+- Heartbeat separation and startup behavior that avoids importing stale pre-existing clipboard content.
 
 ## Next
 
-1. Add Clipboard pause controls and sensitive-application exclusions.
-2. Add File Shelf drag-out and missing-file recovery.
-3. Add persistent notes and background-capable timers.
-4. Add Windows audio, Keep Awake, launcher persistence and hotkeys.
+1. Add File Shelf drag-out and missing-file recovery.
+2. Add persistent notes and background-capable timers.
+3. Add Windows audio and Keep Awake services.
+4. Add launcher persistence and global hotkeys.
 
 ## Verification
 
-The Windows workstation passes `flutter analyze`, thirty-two Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf/Clipboard tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native media and clipboard stream events, exercises foreground fullscreen detection, and verifies Credential Manager-backed clipboard encryption round-trip without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.
+The Windows workstation passes `flutter analyze`, thirty-three Flutter widget/controller/layout/persistence/media/fullscreen/auto-hide/File Shelf/Clipboard tests, a Windows Flutter-Rust integration test, `cargo fmt --all --check`, strict Clippy and twenty-one Rust workspace tests using the MSVC linker. The integration test opens the real Windows GSMTC manager, receives its first native media and clipboard stream events, exercises foreground fullscreen detection, and verifies Credential Manager-backed clipboard encryption round-trip without reading or logging key material. The release executable is smoke-tested through native service initialization, its tray lifecycle and native auto-hide behavior.

@@ -50,10 +50,10 @@ void main() {
       ),
       'IslandDesk clipboard secret',
     );
-    expect(
-      await watchClipboardText().first.timeout(const Duration(seconds: 5)),
-      anyOf(isNull, isA<String>()),
-    );
+    final clipboardEvent =
+        await watchClipboardText().first.timeout(const Duration(seconds: 5));
+    expect(clipboardEvent.isHeartbeat, isTrue);
+    expect(clipboardEvent.text, isNull);
     expect(await isForegroundFullscreen(), isA<bool>());
     final media = await getCurrentMediaSession();
     final event = await watchMediaSessions().first.timeout(
