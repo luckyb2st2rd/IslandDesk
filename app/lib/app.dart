@@ -27,6 +27,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
       _controller.media,
       _controller.shelf,
       _controller.clipboard,
+      _controller.productivity,
     ]);
   }
 
@@ -60,6 +61,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
               mediaController: _controller.media,
               shelfController: _controller.shelf,
               clipboardController: _controller.clipboard,
+              productivityController: _controller.productivity,
               animationsEnabled: _controller.animationsEnabled,
               coreStatusLabel: _controller.coreStatusLabel,
               clipboardSecurityReady: _controller.clipboardSecurityReady,

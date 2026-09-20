@@ -6,6 +6,9 @@ import 'package:islanddesk/clipboard/clipboard_view.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
 import 'package:islanddesk/media/media_controller.dart';
+import 'package:islanddesk/productivity/notes_view.dart';
+import 'package:islanddesk/productivity/productivity_controller.dart';
+import 'package:islanddesk/productivity/timer_view.dart';
 import 'package:islanddesk/shelf/shelf_controller.dart';
 import 'package:islanddesk/shelf/shelf_view.dart';
 
@@ -15,6 +18,7 @@ class IslandSurface extends StatelessWidget {
     required this.mediaController,
     required this.shelfController,
     required this.clipboardController,
+    required this.productivityController,
     this.animationsEnabled = true,
     this.coreStatusLabel = 'Rust core preview',
     this.clipboardSecurityReady = false,
@@ -30,6 +34,7 @@ class IslandSurface extends StatelessWidget {
   final MediaController mediaController;
   final ShelfController shelfController;
   final ClipboardController clipboardController;
+  final ProductivityController productivityController;
   final bool animationsEnabled;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
@@ -99,6 +104,7 @@ class IslandSurface extends StatelessWidget {
                             mediaController: mediaController,
                             shelfController: shelfController,
                             clipboardController: clipboardController,
+                            productivityController: productivityController,
                             coreStatusLabel: coreStatusLabel,
                             clipboardSecurityReady: clipboardSecurityReady,
                             clipboardSecurityBackend: clipboardSecurityBackend,
@@ -165,6 +171,7 @@ class _ExpandedContent extends StatelessWidget {
     required this.mediaController,
     required this.shelfController,
     required this.clipboardController,
+    required this.productivityController,
     required this.coreStatusLabel,
     required this.clipboardSecurityReady,
     required this.clipboardSecurityBackend,
@@ -177,6 +184,7 @@ class _ExpandedContent extends StatelessWidget {
   final MediaController mediaController;
   final ShelfController shelfController;
   final ClipboardController clipboardController;
+  final ProductivityController productivityController;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
   final String clipboardSecurityBackend;
@@ -270,8 +278,8 @@ class _ExpandedContent extends StatelessWidget {
                 securityReady: clipboardSecurityReady,
                 securityBackend: clipboardSecurityBackend,
               ),
-              const _TimerModule(),
-              const _NotesModule(),
+              TimerView(controller: productivityController),
+              NotesView(controller: productivityController),
               const _ComingSoonModule(
                 key: ValueKey('launcher-content'),
                 icon: Icons.rocket_launch_outlined,
@@ -511,179 +519,6 @@ class _MediaModule extends StatelessWidget {
                   ? () => unawaited(mediaController.next())
                   : null,
               icon: const Icon(Icons.skip_next_rounded),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _NotesModule extends StatefulWidget {
-  const _NotesModule();
-
-  @override
-  State<_NotesModule> createState() => _NotesModuleState();
-}
-
-class _NotesModuleState extends State<_NotesModule> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Quick note',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ),
-            Chip(
-              visualDensity: VisualDensity.compact,
-              label: Text('Session only'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: TextField(
-            key: const ValueKey('notes-editor'),
-            controller: _controller,
-            expands: true,
-            maxLines: null,
-            minLines: null,
-            textAlignVertical: TextAlignVertical.top,
-            decoration: InputDecoration(
-              hintText: 'Write a note…',
-              filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.045),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.white10),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.white10),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TimerModule extends StatefulWidget {
-  const _TimerModule();
-
-  @override
-  State<_TimerModule> createState() => _TimerModuleState();
-}
-
-class _TimerModuleState extends State<_TimerModule> {
-  Timer? _ticker;
-  int _durationSeconds = 300;
-  int _remainingSeconds = 300;
-  bool _running = false;
-
-  void _selectDuration(int seconds) {
-    _ticker?.cancel();
-    setState(() {
-      _durationSeconds = seconds;
-      _remainingSeconds = seconds;
-      _running = false;
-    });
-  }
-
-  void _toggle() {
-    if (_running) {
-      _ticker?.cancel();
-      setState(() => _running = false);
-      return;
-    }
-    if (_remainingSeconds == 0) _remainingSeconds = _durationSeconds;
-    setState(() => _running = true);
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) return;
-      setState(() {
-        _remainingSeconds--;
-        if (_remainingSeconds <= 0) {
-          _remainingSeconds = 0;
-          _running = false;
-          _ticker?.cancel();
-        }
-      });
-    });
-  }
-
-  void _reset() {
-    _ticker?.cancel();
-    setState(() {
-      _remainingSeconds = _durationSeconds;
-      _running = false;
-    });
-  }
-
-  @override
-  void dispose() {
-    _ticker?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final minutes = (_remainingSeconds ~/ 60).toString().padLeft(2, '0');
-    final seconds = (_remainingSeconds % 60).toString().padLeft(2, '0');
-    return Column(
-      children: [
-        Text(
-          '$minutes:$seconds',
-          key: const ValueKey('timer-value'),
-          style: const TextStyle(
-            fontSize: 52,
-            height: 1,
-            fontWeight: FontWeight.w700,
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
-        ),
-        const SizedBox(height: 18),
-        Wrap(
-          spacing: 8,
-          children: [
-            for (final preset in const [300, 600, 1500])
-              ChoiceChip(
-                label: Text('${preset ~/ 60} min'),
-                selected: _durationSeconds == preset,
-                onSelected: (_) => _selectDuration(preset),
-              ),
-          ],
-        ),
-        const Spacer(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FilledButton.icon(
-              key: const ValueKey('timer-toggle'),
-              onPressed: _toggle,
-              icon: Icon(_running ? Icons.pause_rounded : Icons.play_arrow),
-              label: Text(_running ? 'Pause' : 'Start'),
-            ),
-            const SizedBox(width: 10),
-            IconButton(
-              key: const ValueKey('timer-reset'),
-              tooltip: 'Reset timer',
-              onPressed: _reset,
-              icon: const Icon(Icons.replay_rounded),
             ),
           ],
         ),
