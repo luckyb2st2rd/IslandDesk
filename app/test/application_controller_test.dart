@@ -34,12 +34,14 @@ void main() {
     controller.setHideInFullscreen(false);
     controller.setAutoHidePanel(false);
     controller.setMonitorPreference(MonitorPreference.followActive);
+    controller.setGlobalHotkey(GlobalHotkeyShortcut.ctrlAltI);
 
     expect(controller.alwaysOnTop, isFalse);
     expect(controller.animationsEnabled, isFalse);
     expect(controller.hideInFullscreen, isFalse);
     expect(controller.autoHidePanel, isFalse);
     expect(controller.monitorPreference, MonitorPreference.followActive);
+    expect(controller.globalHotkeyShortcut, GlobalHotkeyShortcut.ctrlAltI);
 
     controller.dispose();
   });
@@ -83,6 +85,7 @@ void main() {
     controller.setHideInFullscreen(false);
     controller.setAutoHidePanel(false);
     controller.setMonitorPreference(MonitorPreference.followActive);
+    controller.setGlobalHotkey(GlobalHotkeyShortcut.ctrlShiftSpace);
     await controller.close();
 
     expect(repository.saved?.alwaysOnTop, isFalse);
@@ -92,6 +95,10 @@ void main() {
     expect(
       repository.saved?.monitorPreference,
       MonitorPreference.followActive,
+    );
+    expect(
+      repository.saved?.globalHotkey,
+      GlobalHotkeyShortcut.ctrlShiftSpace,
     );
     expect(repository.isClosed, isTrue);
 

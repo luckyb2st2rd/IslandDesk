@@ -27,6 +27,14 @@ void main() {
     await tester.pump();
     expect(controller.hideInFullscreen, isFalse);
 
+    final hotkeySetting = find.byKey(const ValueKey('global-hotkey-setting'));
+    await tester.ensureVisible(hotkeySetting);
+    await tester.tap(hotkeySetting);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ctrl + Alt + I').last);
+    await tester.pumpAndSettle();
+    expect(controller.globalHotkeyShortcut, GlobalHotkeyShortcut.ctrlAltI);
+
     final monitorMode = find.byKey(const ValueKey('monitor-mode-setting'));
     await tester.ensureVisible(monitorMode);
     await tester.tap(monitorMode);

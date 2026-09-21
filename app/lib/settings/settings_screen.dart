@@ -92,6 +92,13 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     const _SectionTitle(
+                      title: 'Keyboard',
+                      subtitle: 'Open IslandDesk from any application.',
+                    ),
+                    const SizedBox(height: 12),
+                    _GlobalHotkeySettings(controller: controller),
+                    const SizedBox(height: 24),
+                    const _SectionTitle(
                       title: 'Monitor',
                       subtitle:
                           'Choose where IslandDesk appears and follows you.',
@@ -121,6 +128,55 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _GlobalHotkeySettings extends StatelessWidget {
+  const _GlobalHotkeySettings({required this.controller});
+
+  final ApplicationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final hotkey = controller.globalHotkey;
+    final status = !hotkey.isSupported
+        ? 'Not available on this platform'
+        : controller.globalHotkeyShortcut == GlobalHotkeyShortcut.disabled
+            ? 'Global shortcut is disabled'
+            : hotkey.errorCode != null
+                ? 'Shortcut is already used by another application'
+                : hotkey.registered
+                    ? 'Active system-wide'
+                    : 'Registering shortcut…';
+    return _SettingsCard(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: DropdownButtonFormField<GlobalHotkeyShortcut>(
+            key: const ValueKey('global-hotkey-setting'),
+            initialValue: controller.globalHotkeyShortcut,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              icon: const Icon(Icons.keyboard_command_key_rounded),
+              labelText: 'Open IslandDesk',
+              helperText: status,
+            ),
+            items: [
+              for (final shortcut in GlobalHotkeyShortcut.values)
+                DropdownMenuItem(
+                  value: shortcut,
+                  child: Text(shortcut.label),
+                ),
+            ],
+            onChanged: hotkey.isSupported
+                ? (value) {
+                    if (value != null) controller.setGlobalHotkey(value);
+                  }
+                : null,
+          ),
+        ),
+      ],
     );
   }
 }

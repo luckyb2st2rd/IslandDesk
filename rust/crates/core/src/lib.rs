@@ -2,6 +2,7 @@
 
 pub mod clipboard;
 pub mod fullscreen;
+pub mod hotkey;
 pub mod launcher;
 pub mod media;
 pub mod system_controls;

@@ -8,6 +8,7 @@ import 'package:islanddesk/clipboard/sqlite_clipboard_repository.dart';
 import 'package:islanddesk/desktop/desktop_window_controller.dart';
 import 'package:islanddesk/desktop/edge_reveal_controller.dart';
 import 'package:islanddesk/desktop/fullscreen_controller.dart';
+import 'package:islanddesk/desktop/global_hotkey_controller.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
 import 'package:islanddesk/desktop/tray_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
@@ -59,13 +60,22 @@ Future<void> main() async {
   await launcherController.load();
   final fullscreenController = FullscreenController();
   await fullscreenController.start();
-  final application = ApplicationController(
+  final desktopWindow = DesktopWindowController(monitorService: monitorService);
+  late final ApplicationController application;
+  final globalHotkeyController = GlobalHotkeyController(
+    onActivated: () {
+      application.showIsland();
+      unawaited(desktopWindow.show());
+    },
+  );
+  application = ApplicationController(
     mediaController: mediaController,
     launcherController: launcherController,
     shelfController: shelfController,
     clipboardController: clipboardController,
     productivityController: productivityController,
     systemControlsController: systemControlsController,
+    globalHotkeyController: globalHotkeyController,
     initialSettings: await settingsRepository.load(),
     settingsRepository: settingsRepository,
     availableMonitors: availableMonitors,
@@ -81,7 +91,6 @@ Future<void> main() async {
     monitorPreference: application.monitorPreference,
     fixedMonitorId: application.fixedMonitorId,
   );
-  final desktopWindow = DesktopWindowController(monitorService: monitorService);
   await desktopWindow.initialize(
     IslandState.collapsed,
     monitorPreference: application.monitorPreference,
@@ -92,6 +101,7 @@ Future<void> main() async {
     autoHideSuppressed: application.isPanelAutoHidden,
   );
   await desktopWindow.setAlwaysOnTop(application.alwaysOnTop);
+  await globalHotkeyController.start(application.globalHotkeyShortcut);
 
   void syncWindow() {
     switch (application.view) {

@@ -30,6 +30,7 @@ class _IslandDeskAppState extends State<IslandDeskApp> {
       _controller.clipboard,
       _controller.productivity,
       _controller.systemControls,
+      _controller.globalHotkey,
     ]);
   }
 

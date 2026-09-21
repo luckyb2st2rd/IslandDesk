@@ -19,6 +19,7 @@ class SqliteSettingsRepository implements SettingsRepository {
   static const _autoHidePanelKey = 'auto_hide_panel';
   static const _monitorPreferenceKey = 'monitor_preference';
   static const _fixedMonitorIdKey = 'fixed_monitor_id';
+  static const _globalHotkeyKey = 'global_hotkey';
 
   final Database _database;
 
@@ -77,6 +78,9 @@ class SqliteSettingsRepository implements SettingsRepository {
         _readText(_monitorPreferenceKey),
       ),
       fixedMonitorId: _readText(_fixedMonitorIdKey),
+      globalHotkey: GlobalHotkeyShortcut.fromStorage(
+        _readText(_globalHotkeyKey),
+      ),
     );
   }
 
@@ -111,6 +115,7 @@ class SqliteSettingsRepository implements SettingsRepository {
         settings.monitorPreference.storageValue,
       );
       _writeOptionalText(_fixedMonitorIdKey, settings.fixedMonitorId);
+      _writeText(_globalHotkeyKey, settings.globalHotkey.storageValue);
       _database.execute('COMMIT');
     } catch (_) {
       _database.execute('ROLLBACK');

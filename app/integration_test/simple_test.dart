@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:islanddesk/src/rust/api/clipboard.dart';
 import 'package:islanddesk/src/rust/api/fullscreen.dart';
 import 'package:islanddesk/src/rust/api/launcher.dart';
+import 'package:islanddesk/src/rust/api/hotkey.dart';
 import 'package:islanddesk/src/rust/api/media.dart';
 import 'package:islanddesk/src/rust/api/monitor.dart';
 import 'package:islanddesk/src/rust/api/system.dart';
@@ -33,6 +34,13 @@ void main() {
     expect(mediaPlatformSupported(), isTrue);
     expect(fullscreenPlatformSupported(), isTrue);
     expect(launcherPlatformSupported(), isTrue);
+    expect(globalHotkeyPlatformSupported(), isTrue);
+    configureGlobalHotkey(shortcut: 'ctrl_alt_i');
+    final hotkeyEvent =
+        await watchGlobalHotkey().first.timeout(const Duration(seconds: 5));
+    expect(hotkeyEvent.registered, isTrue);
+    expect(hotkeyEvent.errorCode, isNull);
+    configureGlobalHotkey(shortcut: 'disabled');
     expect(clipboardSecurityPlatformSupported(), isTrue);
     expect(systemControlsPlatformSupported(), isTrue);
     final clipboardSecurity = initializeClipboardSecurity();

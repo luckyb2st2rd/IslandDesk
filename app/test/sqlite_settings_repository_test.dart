@@ -21,6 +21,7 @@ void main() {
     expect(defaults.autoHidePanel, isTrue);
     expect(defaults.monitorPreference, MonitorPreference.primary);
     expect(defaults.fixedMonitorId, isNull);
+    expect(defaults.globalHotkey, GlobalHotkeyShortcut.ctrlAltSpace);
 
     await repository.save(
       const AppSettings(
@@ -30,6 +31,7 @@ void main() {
         autoHidePanel: false,
         monitorPreference: MonitorPreference.fixed,
         fixedMonitorId: 'display-2',
+        globalHotkey: GlobalHotkeyShortcut.ctrlAltI,
       ),
     );
 
@@ -43,6 +45,7 @@ void main() {
     expect(stored.autoHidePanel, isFalse);
     expect(stored.monitorPreference, MonitorPreference.fixed);
     expect(stored.fixedMonitorId, 'display-2');
+    expect(stored.globalHotkey, GlobalHotkeyShortcut.ctrlAltI);
 
     await repository.close();
   });
@@ -74,6 +77,7 @@ void main() {
     expect(migrated.hideInFullscreen, isTrue);
     expect(migrated.autoHidePanel, isTrue);
     expect(migrated.monitorPreference, MonitorPreference.primary);
+    expect(migrated.globalHotkey, GlobalHotkeyShortcut.ctrlAltSpace);
     await repository.close();
   });
 }

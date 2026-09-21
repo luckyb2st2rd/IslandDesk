@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:islanddesk/clipboard/clipboard_controller.dart';
 import 'package:islanddesk/desktop/monitor_service.dart';
+import 'package:islanddesk/desktop/global_hotkey_controller.dart';
 import 'package:islanddesk/desktop/panel_visibility_controller.dart';
 import 'package:islanddesk/island/island_controller.dart';
 import 'package:islanddesk/island/island_state.dart';
@@ -26,6 +27,7 @@ class ApplicationController extends ChangeNotifier {
     ProductivityController? productivityController,
     SystemControlsController? systemControlsController,
     PanelVisibilityController? panelVisibilityController,
+    GlobalHotkeyController? globalHotkeyController,
     AppSettings initialSettings = const AppSettings(),
     SettingsRepository? settingsRepository,
     this.availableMonitors = const [],
@@ -42,6 +44,8 @@ class ApplicationController extends ChangeNotifier {
         systemControls = systemControlsController ?? SystemControlsController(),
         panelVisibility =
             panelVisibilityController ?? PanelVisibilityController(),
+        globalHotkey = globalHotkeyController ??
+            GlobalHotkeyController(onActivated: () {}),
         _settings = initialSettings,
         _settingsRepository = settingsRepository {
     if (_settings.monitorPreference == MonitorPreference.fixed &&
@@ -62,6 +66,7 @@ class ApplicationController extends ChangeNotifier {
   final ProductivityController productivity;
   final SystemControlsController systemControls;
   final PanelVisibilityController panelVisibility;
+  final GlobalHotkeyController globalHotkey;
   final String coreStatusLabel;
   final bool clipboardSecurityReady;
   final String clipboardSecurityBackend;
@@ -79,6 +84,7 @@ class ApplicationController extends ChangeNotifier {
   bool get autoHidePanel => _settings.autoHidePanel;
   MonitorPreference get monitorPreference => _settings.monitorPreference;
   String? get fixedMonitorId => _settings.fixedMonitorId;
+  GlobalHotkeyShortcut get globalHotkeyShortcut => _settings.globalHotkey;
   bool get isPanelAutoHidden =>
       _settings.autoHidePanel &&
       _view == ApplicationView.island &&
@@ -171,6 +177,14 @@ class ApplicationController extends ChangeNotifier {
     _scheduleSave();
   }
 
+  void setGlobalHotkey(GlobalHotkeyShortcut shortcut) {
+    if (_settings.globalHotkey == shortcut) return;
+    _settings = _settings.copyWith(globalHotkey: shortcut);
+    globalHotkey.configure(shortcut);
+    notifyListeners();
+    _scheduleSave();
+  }
+
   void _scheduleSave() {
     final repository = _settingsRepository;
     if (repository == null) return;
@@ -185,6 +199,7 @@ class ApplicationController extends ChangeNotifier {
     await clipboard.close();
     await productivity.close();
     await systemControls.close();
+    await globalHotkey.close();
     await _settingsRepository?.close();
   }
 
@@ -210,6 +225,7 @@ class ApplicationController extends ChangeNotifier {
     productivity.dispose();
     systemControls.dispose();
     panelVisibility.dispose();
+    globalHotkey.dispose();
     super.dispose();
   }
 }

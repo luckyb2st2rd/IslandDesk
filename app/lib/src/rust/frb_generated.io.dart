@@ -5,6 +5,7 @@
 
 import 'api/clipboard.dart';
 import 'api/fullscreen.dart';
+import 'api/hotkey.dart';
 import 'api/launcher.dart';
 import 'api/media.dart';
 import 'api/monitor.dart';
@@ -30,6 +31,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   RustStreamSink<ClipboardCaptureEvent>
       dco_decode_StreamSink_clipboard_capture_event_Sse(dynamic raw);
+
+  @protected
+  RustStreamSink<GlobalHotkeyEvent>
+      dco_decode_StreamSink_global_hotkey_event_Sse(dynamic raw);
 
   @protected
   RustStreamSink<MediaSession?>
@@ -61,6 +66,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   CoreStatus dco_decode_core_status(dynamic raw);
+
+  @protected
+  GlobalHotkeyEvent dco_decode_global_hotkey_event(dynamic raw);
 
   @protected
   int dco_decode_i_32(dynamic raw);
@@ -119,6 +127,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
           SseDeserializer deserializer);
 
   @protected
+  RustStreamSink<GlobalHotkeyEvent>
+      sse_decode_StreamSink_global_hotkey_event_Sse(
+          SseDeserializer deserializer);
+
+  @protected
   RustStreamSink<MediaSession?>
       sse_decode_StreamSink_opt_box_autoadd_media_session_Sse(
           SseDeserializer deserializer);
@@ -155,6 +168,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   CoreStatus sse_decode_core_status(SseDeserializer deserializer);
+
+  @protected
+  GlobalHotkeyEvent sse_decode_global_hotkey_event(
+      SseDeserializer deserializer);
 
   @protected
   int sse_decode_i_32(SseDeserializer deserializer);
@@ -217,6 +234,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       RustStreamSink<ClipboardCaptureEvent> self, SseSerializer serializer);
 
   @protected
+  void sse_encode_StreamSink_global_hotkey_event_Sse(
+      RustStreamSink<GlobalHotkeyEvent> self, SseSerializer serializer);
+
+  @protected
   void sse_encode_StreamSink_opt_box_autoadd_media_session_Sse(
       RustStreamSink<MediaSession?> self, SseSerializer serializer);
 
@@ -252,6 +273,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_core_status(CoreStatus self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_global_hotkey_event(
+      GlobalHotkeyEvent self, SseSerializer serializer);
 
   @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
